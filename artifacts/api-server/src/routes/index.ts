@@ -7,6 +7,7 @@ import transcriptsRouter from "./transcripts";
 import exportsRouter from "./exports";
 import storageRouter from "./storage";
 import emailRouter from "./email";
+import textMessagesRouter from "./text-messages";
 
 const router: IRouter = Router();
 
@@ -18,5 +19,6 @@ router.use(transcriptsRouter);
 router.use(exportsRouter);
 router.use(storageRouter);
 router.use(emailRouter);
+router.use(textMessagesRouter);
 
 export default router;

@@ -5,3 +5,5 @@ export * from "./transcripts";
 export * from "./exports";
 export * from "./email-connections";
 export * from "./email-metadata";
+export * from "./text-message-threads";
+export * from "./text-messages-sms";

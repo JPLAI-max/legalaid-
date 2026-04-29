@@ -24,6 +24,8 @@ tags:
     description: Object storage
   - name: email
     description: Email import operations
+  - name: textMessages
+    description: Text message import and management
 
 paths:
   /healthz:
@@ -892,6 +894,129 @@ paths:
                 items:
                   $ref: "#/components/schemas/ImportedEmail"
 
+  # ── Text Messages ─────────────────────────────────────────────────────────────
+  /cases/{caseId}/text-messages/threads:
+    get:
+      operationId: listTextMessageThreads
+      tags: [textMessages]
+      summary: List all text message threads for a case
+      parameters:
+        - name: caseId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of text message threads
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TextMessageThread"
+
+  /cases/{caseId}/text-messages/upload:
+    post:
+      operationId: uploadTextMessages
+      tags: [textMessages]
+      summary: Upload and parse a text message export file
+      parameters:
+        - name: caseId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                myName:
+                  type: string
+                  description: The user's own name or phone number in the export
+              required: [file]
+      responses:
+        "201":
+          description: Parsed thread with messages
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TextMessageUploadResult"
+
+  /cases/{caseId}/text-messages/threads/{threadId}:
+    get:
+      operationId: getTextMessageThread
+      tags: [textMessages]
+      summary: Get a thread with all its messages
+      parameters:
+        - name: caseId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: threadId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Thread with messages
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TextMessageThreadDetail"
+    delete:
+      operationId: deleteTextMessageThread
+      tags: [textMessages]
+      summary: Delete a thread and all its messages
+      parameters:
+        - name: caseId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: threadId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /cases/{caseId}/text-messages/threads/{threadId}/suggest:
+    post:
+      operationId: suggestEventsFromMessages
+      tags: [textMessages]
+      summary: Use AI to suggest timeline events from a conversation thread
+      parameters:
+        - name: caseId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: threadId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: AI-suggested timeline events
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/SuggestedSmsEvent"
+
 components:
   schemas:
     HealthStatus:
@@ -1447,3 +1572,101 @@ components:
         importedAt:
           type: string
       required: [id, evidenceId, provider, hasAttachment, importedAt]
+
+    SmsMessage:
+      type: object
+      properties:
+        id:
+          type: integer
+        threadId:
+          type: integer
+        sender:
+          type: string
+        senderIsMe:
+          type: boolean
+        content:
+          type: string
+        sentAt:
+          type: string
+          nullable: true
+        sequenceNumber:
+          type: integer
+        importedAt:
+          type: string
+      required: [id, threadId, sender, senderIsMe, content, sequenceNumber, importedAt]
+
+    TextMessageThread:
+      type: object
+      properties:
+        id:
+          type: integer
+        caseId:
+          type: integer
+        evidenceId:
+          type: integer
+          nullable: true
+        contactName:
+          type: string
+        contactPhone:
+          type: string
+          nullable: true
+        sourceFilename:
+          type: string
+        messageCount:
+          type: integer
+        firstMessageAt:
+          type: string
+          nullable: true
+        lastMessageAt:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+      required: [id, caseId, contactName, sourceFilename, messageCount, createdAt]
+
+    TextMessageThreadDetail:
+      type: object
+      properties:
+        thread:
+          $ref: "#/components/schemas/TextMessageThread"
+        messages:
+          type: array
+          items:
+            $ref: "#/components/schemas/SmsMessage"
+      required: [thread, messages]
+
+    TextMessageUploadResult:
+      type: object
+      properties:
+        thread:
+          $ref: "#/components/schemas/TextMessageThread"
+        messages:
+          type: array
+          items:
+            $ref: "#/components/schemas/SmsMessage"
+        evidenceId:
+          type: integer
+      required: [thread, messages, evidenceId]
+
+    SuggestedSmsEvent:
+      type: object
+      properties:
+        title:
+          type: string
+        estimatedDate:
+          type: string
+          nullable: true
+        description:
+          type: string
+        people:
+          type: array
+          items:
+            type: string
+        confidenceLevel:
+          type: string
+          enum: [high, medium, low]
+        relevantMessageIds:
+          type: array
+          items:
+            type: integer
+      required: [title, description, people, confidenceLevel, relevantMessageIds]

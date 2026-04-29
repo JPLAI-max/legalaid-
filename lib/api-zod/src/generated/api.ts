@@ -708,3 +708,104 @@ export const ListImportedEmailsResponseItem = zod.object({
 export const ListImportedEmailsResponse = zod.array(
   ListImportedEmailsResponseItem,
 );
+
+/**
+ * @summary List all text message threads for a case
+ */
+export const ListTextMessageThreadsParams = zod.object({
+  caseId: zod.coerce.number(),
+});
+
+export const ListTextMessageThreadsResponseItem = zod.object({
+  id: zod.number(),
+  caseId: zod.number(),
+  evidenceId: zod.number().nullish(),
+  contactName: zod.string(),
+  contactPhone: zod.string().nullish(),
+  sourceFilename: zod.string(),
+  messageCount: zod.number(),
+  firstMessageAt: zod.string().nullish(),
+  lastMessageAt: zod.string().nullish(),
+  createdAt: zod.string(),
+});
+export const ListTextMessageThreadsResponse = zod.array(
+  ListTextMessageThreadsResponseItem,
+);
+
+/**
+ * @summary Upload and parse a text message export file
+ */
+export const UploadTextMessagesParams = zod.object({
+  caseId: zod.coerce.number(),
+});
+
+export const UploadTextMessagesBody = zod.object({
+  file: zod.instanceof(File),
+  myName: zod
+    .string()
+    .optional()
+    .describe("The user's own name or phone number in the export"),
+});
+
+/**
+ * @summary Get a thread with all its messages
+ */
+export const GetTextMessageThreadParams = zod.object({
+  caseId: zod.coerce.number(),
+  threadId: zod.coerce.number(),
+});
+
+export const GetTextMessageThreadResponse = zod.object({
+  thread: zod.object({
+    id: zod.number(),
+    caseId: zod.number(),
+    evidenceId: zod.number().nullish(),
+    contactName: zod.string(),
+    contactPhone: zod.string().nullish(),
+    sourceFilename: zod.string(),
+    messageCount: zod.number(),
+    firstMessageAt: zod.string().nullish(),
+    lastMessageAt: zod.string().nullish(),
+    createdAt: zod.string(),
+  }),
+  messages: zod.array(
+    zod.object({
+      id: zod.number(),
+      threadId: zod.number(),
+      sender: zod.string(),
+      senderIsMe: zod.boolean(),
+      content: zod.string(),
+      sentAt: zod.string().nullish(),
+      sequenceNumber: zod.number(),
+      importedAt: zod.string(),
+    }),
+  ),
+});
+
+/**
+ * @summary Delete a thread and all its messages
+ */
+export const DeleteTextMessageThreadParams = zod.object({
+  caseId: zod.coerce.number(),
+  threadId: zod.coerce.number(),
+});
+
+/**
+ * @summary Use AI to suggest timeline events from a conversation thread
+ */
+export const SuggestEventsFromMessagesParams = zod.object({
+  caseId: zod.coerce.number(),
+  threadId: zod.coerce.number(),
+});
+
+export const SuggestEventsFromMessagesResponseItem = zod.object({
+  title: zod.string(),
+  estimatedDate: zod.string().nullish(),
+  description: zod.string(),
+  people: zod.array(zod.string()),
+  confidenceLevel: zod.enum(["high", "medium", "low"]),
+  relevantMessageIds: zod.array(zod.number()),
+});
+export const SuggestEventsFromMessagesResponse = zod.array(
+  SuggestEventsFromMessagesResponseItem,
+);

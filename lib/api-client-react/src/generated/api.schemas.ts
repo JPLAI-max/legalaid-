@@ -372,6 +372,59 @@ export interface ImportedEmail {
   importedAt: string;
 }
 
+export interface SmsMessage {
+  id: number;
+  threadId: number;
+  sender: string;
+  senderIsMe: boolean;
+  content: string;
+  sentAt?: string | null;
+  sequenceNumber: number;
+  importedAt: string;
+}
+
+export interface TextMessageThread {
+  id: number;
+  caseId: number;
+  evidenceId?: number | null;
+  contactName: string;
+  contactPhone?: string | null;
+  sourceFilename: string;
+  messageCount: number;
+  firstMessageAt?: string | null;
+  lastMessageAt?: string | null;
+  createdAt: string;
+}
+
+export interface TextMessageThreadDetail {
+  thread: TextMessageThread;
+  messages: SmsMessage[];
+}
+
+export interface TextMessageUploadResult {
+  thread: TextMessageThread;
+  messages: SmsMessage[];
+  evidenceId: number;
+}
+
+export type SuggestedSmsEventConfidenceLevel =
+  (typeof SuggestedSmsEventConfidenceLevel)[keyof typeof SuggestedSmsEventConfidenceLevel];
+
+export const SuggestedSmsEventConfidenceLevel = {
+  high: "high",
+  medium: "medium",
+  low: "low",
+} as const;
+
+export interface SuggestedSmsEvent {
+  title: string;
+  estimatedDate?: string | null;
+  description: string;
+  people: string[];
+  confidenceLevel: SuggestedSmsEventConfidenceLevel;
+  relevantMessageIds: number[];
+}
+
 export type ListEvidenceParams = {
   search?: string;
   fileType?: string;
@@ -386,4 +439,10 @@ export type AttachEvidenceToEvent201 = {
 
 export type IgnoreSuggestedEvent200 = {
   success: boolean;
+};
+
+export type UploadTextMessagesBody = {
+  file: Blob;
+  /** The user's own name or phone number in the export */
+  myName?: string;
 };

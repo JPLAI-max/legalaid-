@@ -44,12 +44,17 @@ import type {
   SaveCaseSummaryBody,
   SuggestEventsBody,
   SuggestedEvent,
+  SuggestedSmsEvent,
+  TextMessageThread,
+  TextMessageThreadDetail,
+  TextMessageUploadResult,
   TimelineEvent,
   Transcript,
   UpdateCaseBody,
   UpdateEvidenceBody,
   UpdateTimelineEventBody,
   UpdateTranscriptBody,
+  UploadTextMessagesBody,
 } from "./api.schemas";
 
 import { customFetch } from "../custom-fetch";
@@ -3413,3 +3418,474 @@ export function useListImportedEmails<
 
   return { ...query, queryKey: queryOptions.queryKey };
 }
+
+/**
+ * @summary List all text message threads for a case
+ */
+export const getListTextMessageThreadsUrl = (caseId: number) => {
+  return `/api/cases/${caseId}/text-messages/threads`;
+};
+
+export const listTextMessageThreads = async (
+  caseId: number,
+  options?: RequestInit,
+): Promise<TextMessageThread[]> => {
+  return customFetch<TextMessageThread[]>(
+    getListTextMessageThreadsUrl(caseId),
+    {
+      ...options,
+      method: "GET",
+    },
+  );
+};
+
+export const getListTextMessageThreadsQueryKey = (caseId: number) => {
+  return [`/api/cases/${caseId}/text-messages/threads`] as const;
+};
+
+export const getListTextMessageThreadsQueryOptions = <
+  TData = Awaited<ReturnType<typeof listTextMessageThreads>>,
+  TError = ErrorType<unknown>,
+>(
+  caseId: number,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof listTextMessageThreads>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getListTextMessageThreadsQueryKey(caseId);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof listTextMessageThreads>>
+  > = ({ signal }) =>
+    listTextMessageThreads(caseId, { signal, ...requestOptions });
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: !!caseId,
+    ...queryOptions,
+  } as UseQueryOptions<
+    Awaited<ReturnType<typeof listTextMessageThreads>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type ListTextMessageThreadsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof listTextMessageThreads>>
+>;
+export type ListTextMessageThreadsQueryError = ErrorType<unknown>;
+
+/**
+ * @summary List all text message threads for a case
+ */
+
+export function useListTextMessageThreads<
+  TData = Awaited<ReturnType<typeof listTextMessageThreads>>,
+  TError = ErrorType<unknown>,
+>(
+  caseId: number,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof listTextMessageThreads>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getListTextMessageThreadsQueryOptions(caseId, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Upload and parse a text message export file
+ */
+export const getUploadTextMessagesUrl = (caseId: number) => {
+  return `/api/cases/${caseId}/text-messages/upload`;
+};
+
+export const uploadTextMessages = async (
+  caseId: number,
+  uploadTextMessagesBody: UploadTextMessagesBody,
+  options?: RequestInit,
+): Promise<TextMessageUploadResult> => {
+  const formData = new FormData();
+  formData.append(`file`, uploadTextMessagesBody.file);
+  if (uploadTextMessagesBody.myName !== undefined) {
+    formData.append(`myName`, uploadTextMessagesBody.myName);
+  }
+
+  return customFetch<TextMessageUploadResult>(
+    getUploadTextMessagesUrl(caseId),
+    {
+      ...options,
+      method: "POST",
+      body: formData,
+    },
+  );
+};
+
+export const getUploadTextMessagesMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof uploadTextMessages>>,
+    TError,
+    { caseId: number; data: BodyType<UploadTextMessagesBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof uploadTextMessages>>,
+  TError,
+  { caseId: number; data: BodyType<UploadTextMessagesBody> },
+  TContext
+> => {
+  const mutationKey = ["uploadTextMessages"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof uploadTextMessages>>,
+    { caseId: number; data: BodyType<UploadTextMessagesBody> }
+  > = (props) => {
+    const { caseId, data } = props ?? {};
+
+    return uploadTextMessages(caseId, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type UploadTextMessagesMutationResult = NonNullable<
+  Awaited<ReturnType<typeof uploadTextMessages>>
+>;
+export type UploadTextMessagesMutationBody = BodyType<UploadTextMessagesBody>;
+export type UploadTextMessagesMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Upload and parse a text message export file
+ */
+export const useUploadTextMessages = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof uploadTextMessages>>,
+    TError,
+    { caseId: number; data: BodyType<UploadTextMessagesBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof uploadTextMessages>>,
+  TError,
+  { caseId: number; data: BodyType<UploadTextMessagesBody> },
+  TContext
+> => {
+  return useMutation(getUploadTextMessagesMutationOptions(options));
+};
+
+/**
+ * @summary Get a thread with all its messages
+ */
+export const getGetTextMessageThreadUrl = (
+  caseId: number,
+  threadId: number,
+) => {
+  return `/api/cases/${caseId}/text-messages/threads/${threadId}`;
+};
+
+export const getTextMessageThread = async (
+  caseId: number,
+  threadId: number,
+  options?: RequestInit,
+): Promise<TextMessageThreadDetail> => {
+  return customFetch<TextMessageThreadDetail>(
+    getGetTextMessageThreadUrl(caseId, threadId),
+    {
+      ...options,
+      method: "GET",
+    },
+  );
+};
+
+export const getGetTextMessageThreadQueryKey = (
+  caseId: number,
+  threadId: number,
+) => {
+  return [`/api/cases/${caseId}/text-messages/threads/${threadId}`] as const;
+};
+
+export const getGetTextMessageThreadQueryOptions = <
+  TData = Awaited<ReturnType<typeof getTextMessageThread>>,
+  TError = ErrorType<unknown>,
+>(
+  caseId: number,
+  threadId: number,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getTextMessageThread>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getGetTextMessageThreadQueryKey(caseId, threadId);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getTextMessageThread>>
+  > = ({ signal }) =>
+    getTextMessageThread(caseId, threadId, { signal, ...requestOptions });
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: !!(caseId && threadId),
+    ...queryOptions,
+  } as UseQueryOptions<
+    Awaited<ReturnType<typeof getTextMessageThread>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetTextMessageThreadQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getTextMessageThread>>
+>;
+export type GetTextMessageThreadQueryError = ErrorType<unknown>;
+
+/**
+ * @summary Get a thread with all its messages
+ */
+
+export function useGetTextMessageThread<
+  TData = Awaited<ReturnType<typeof getTextMessageThread>>,
+  TError = ErrorType<unknown>,
+>(
+  caseId: number,
+  threadId: number,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getTextMessageThread>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetTextMessageThreadQueryOptions(
+    caseId,
+    threadId,
+    options,
+  );
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Delete a thread and all its messages
+ */
+export const getDeleteTextMessageThreadUrl = (
+  caseId: number,
+  threadId: number,
+) => {
+  return `/api/cases/${caseId}/text-messages/threads/${threadId}`;
+};
+
+export const deleteTextMessageThread = async (
+  caseId: number,
+  threadId: number,
+  options?: RequestInit,
+): Promise<void> => {
+  return customFetch<void>(getDeleteTextMessageThreadUrl(caseId, threadId), {
+    ...options,
+    method: "DELETE",
+  });
+};
+
+export const getDeleteTextMessageThreadMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof deleteTextMessageThread>>,
+    TError,
+    { caseId: number; threadId: number },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof deleteTextMessageThread>>,
+  TError,
+  { caseId: number; threadId: number },
+  TContext
+> => {
+  const mutationKey = ["deleteTextMessageThread"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof deleteTextMessageThread>>,
+    { caseId: number; threadId: number }
+  > = (props) => {
+    const { caseId, threadId } = props ?? {};
+
+    return deleteTextMessageThread(caseId, threadId, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type DeleteTextMessageThreadMutationResult = NonNullable<
+  Awaited<ReturnType<typeof deleteTextMessageThread>>
+>;
+
+export type DeleteTextMessageThreadMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Delete a thread and all its messages
+ */
+export const useDeleteTextMessageThread = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof deleteTextMessageThread>>,
+    TError,
+    { caseId: number; threadId: number },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof deleteTextMessageThread>>,
+  TError,
+  { caseId: number; threadId: number },
+  TContext
+> => {
+  return useMutation(getDeleteTextMessageThreadMutationOptions(options));
+};
+
+/**
+ * @summary Use AI to suggest timeline events from a conversation thread
+ */
+export const getSuggestEventsFromMessagesUrl = (
+  caseId: number,
+  threadId: number,
+) => {
+  return `/api/cases/${caseId}/text-messages/threads/${threadId}/suggest`;
+};
+
+export const suggestEventsFromMessages = async (
+  caseId: number,
+  threadId: number,
+  options?: RequestInit,
+): Promise<SuggestedSmsEvent[]> => {
+  return customFetch<SuggestedSmsEvent[]>(
+    getSuggestEventsFromMessagesUrl(caseId, threadId),
+    {
+      ...options,
+      method: "POST",
+    },
+  );
+};
+
+export const getSuggestEventsFromMessagesMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof suggestEventsFromMessages>>,
+    TError,
+    { caseId: number; threadId: number },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof suggestEventsFromMessages>>,
+  TError,
+  { caseId: number; threadId: number },
+  TContext
+> => {
+  const mutationKey = ["suggestEventsFromMessages"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof suggestEventsFromMessages>>,
+    { caseId: number; threadId: number }
+  > = (props) => {
+    const { caseId, threadId } = props ?? {};
+
+    return suggestEventsFromMessages(caseId, threadId, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type SuggestEventsFromMessagesMutationResult = NonNullable<
+  Awaited<ReturnType<typeof suggestEventsFromMessages>>
+>;
+
+export type SuggestEventsFromMessagesMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Use AI to suggest timeline events from a conversation thread
+ */
+export const useSuggestEventsFromMessages = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof suggestEventsFromMessages>>,
+    TError,
+    { caseId: number; threadId: number },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof suggestEventsFromMessages>>,
+  TError,
+  { caseId: number; threadId: number },
+  TContext
+> => {
+  return useMutation(getSuggestEventsFromMessagesMutationOptions(options));
+};
