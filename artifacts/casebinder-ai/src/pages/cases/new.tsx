@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { ArrowLeft, Loader2 } from "lucide-react";
+import { VoiceButton } from "@/components/ui/voice-button";
 import { 
   useCreateCase, 
   CreateCaseBodyCaseType 
@@ -153,7 +154,13 @@ export function NewCase() {
                     <FormItem>
                       <FormLabel>Attorney Name (Optional)</FormLabel>
                       <FormControl>
-                        <Input placeholder="e.g. Jane Doe Esq." {...field} data-testid="input-attorney-name" />
+                        <div className="relative">
+                          <Input placeholder="e.g. Jane Doe Esq." {...field} className="pr-9" data-testid="input-attorney-name" />
+                          <VoiceButton
+                            className="absolute right-1.5 top-1/2 -translate-y-1/2"
+                            onTranscript={(text) => field.onChange(field.value ? field.value + " " + text : text)}
+                          />
+                        </div>
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -168,7 +175,13 @@ export function NewCase() {
                   <FormItem>
                     <FormLabel>Parties Involved</FormLabel>
                     <FormControl>
-                      <Input placeholder="List the main people involved" {...field} data-testid="input-parties" />
+                      <div className="relative">
+                        <Input placeholder="List the main people involved" {...field} className="pr-9" data-testid="input-parties" />
+                        <VoiceButton
+                          className="absolute right-1.5 top-1/2 -translate-y-1/2"
+                          onTranscript={(text) => field.onChange(field.value ? field.value + ", " + text : text)}
+                        />
+                      </div>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -182,12 +195,18 @@ export function NewCase() {
                   <FormItem>
                     <FormLabel>Short Description (Optional)</FormLabel>
                     <FormControl>
-                      <Textarea 
-                        placeholder="Brief summary of what this case is about..." 
-                        className="resize-none" 
-                        {...field} 
-                        data-testid="textarea-description"
-                      />
+                      <div className="relative">
+                        <Textarea 
+                          placeholder="Brief summary of what this case is about..." 
+                          className="resize-none pr-10" 
+                          {...field} 
+                          data-testid="textarea-description"
+                        />
+                        <VoiceButton
+                          className="absolute top-2 right-2"
+                          onTranscript={(text) => field.onChange(field.value ? field.value + " " + text : text)}
+                        />
+                      </div>
                     </FormControl>
                     <FormMessage />
                   </FormItem>

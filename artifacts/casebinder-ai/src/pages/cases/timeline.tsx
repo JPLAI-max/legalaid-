@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { format } from "date-fns";
 import { Plus, Edit2, Trash2, Calendar, FileText, Users, Tag, Loader2 } from "lucide-react";
+import { VoiceButton } from "@/components/ui/voice-button";
 import { 
   useListTimelineEvents, 
   getListTimelineEventsQueryKey,
@@ -284,60 +285,93 @@ export function TimelineBuilder({ params }: { params: { caseId: string } }) {
             
             <div className="space-y-2">
               <Label htmlFor="title">Event Title *</Label>
-              <Input 
-                id="title" 
-                placeholder="Brief, descriptive title"
-                value={formData.title}
-                onChange={(e) => setFormData({...formData, title: e.target.value})}
-                required
-                data-testid="input-event-title"
-              />
+              <div className="relative">
+                <Input 
+                  id="title" 
+                  placeholder="Brief, descriptive title"
+                  value={formData.title}
+                  onChange={(e) => setFormData({...formData, title: e.target.value})}
+                  required
+                  className="pr-9"
+                  data-testid="input-event-title"
+                />
+                <VoiceButton
+                  className="absolute right-1.5 top-1/2 -translate-y-1/2"
+                  onTranscript={(text) => setFormData((f) => ({ ...f, title: f.title ? f.title + " " + text : text }))}
+                />
+              </div>
             </div>
             
             <div className="space-y-2">
               <Label htmlFor="description">Description</Label>
-              <Textarea 
-                id="description" 
-                placeholder="What happened? Stick to the facts."
-                value={formData.description}
-                onChange={(e) => setFormData({...formData, description: e.target.value})}
-                className="min-h-[100px]"
-                data-testid="input-event-desc"
-              />
+              <div className="relative">
+                <Textarea 
+                  id="description" 
+                  placeholder="What happened? Stick to the facts."
+                  value={formData.description}
+                  onChange={(e) => setFormData({...formData, description: e.target.value})}
+                  className="min-h-[100px] pr-10"
+                  data-testid="input-event-desc"
+                />
+                <VoiceButton
+                  className="absolute top-2 right-2"
+                  onTranscript={(text) => setFormData((f) => ({ ...f, description: f.description ? f.description + " " + text : text }))}
+                />
+              </div>
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="attorneyNote">Note for Attorney (Optional)</Label>
-              <Textarea 
-                id="attorneyNote" 
-                placeholder="Why is this important? Any context your attorney needs?"
-                value={formData.attorneyNote}
-                onChange={(e) => setFormData({...formData, attorneyNote: e.target.value})}
-                className="min-h-[80px]"
-                data-testid="input-event-note"
-              />
+              <div className="relative">
+                <Textarea 
+                  id="attorneyNote" 
+                  placeholder="Why is this important? Any context your attorney needs?"
+                  value={formData.attorneyNote}
+                  onChange={(e) => setFormData({...formData, attorneyNote: e.target.value})}
+                  className="min-h-[80px] pr-10"
+                  data-testid="input-event-note"
+                />
+                <VoiceButton
+                  className="absolute top-2 right-2"
+                  onTranscript={(text) => setFormData((f) => ({ ...f, attorneyNote: f.attorneyNote ? f.attorneyNote + " " + text : text }))}
+                />
+              </div>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="people">People (comma separated)</Label>
-                <Input 
-                  id="people" 
-                  placeholder="John Doe, Jane Smith"
-                  value={formData.people}
-                  onChange={(e) => setFormData({...formData, people: e.target.value})}
-                  data-testid="input-event-people"
-                />
+                <div className="relative">
+                  <Input 
+                    id="people" 
+                    placeholder="John Doe, Jane Smith"
+                    value={formData.people}
+                    onChange={(e) => setFormData({...formData, people: e.target.value})}
+                    className="pr-9"
+                    data-testid="input-event-people"
+                  />
+                  <VoiceButton
+                    className="absolute right-1.5 top-1/2 -translate-y-1/2"
+                    onTranscript={(text) => setFormData((f) => ({ ...f, people: f.people ? f.people + ", " + text : text }))}
+                  />
+                </div>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="tags">Tags (comma separated)</Label>
-                <Input 
-                  id="tags" 
-                  placeholder="financial, email, important"
-                  value={formData.tags}
-                  onChange={(e) => setFormData({...formData, tags: e.target.value})}
-                  data-testid="input-event-tags"
-                />
+                <div className="relative">
+                  <Input 
+                    id="tags" 
+                    placeholder="financial, email, important"
+                    value={formData.tags}
+                    onChange={(e) => setFormData({...formData, tags: e.target.value})}
+                    className="pr-9"
+                    data-testid="input-event-tags"
+                  />
+                  <VoiceButton
+                    className="absolute right-1.5 top-1/2 -translate-y-1/2"
+                    onTranscript={(text) => setFormData((f) => ({ ...f, tags: f.tags ? f.tags + ", " + text : text }))}
+                  />
+                </div>
               </div>
             </div>
             

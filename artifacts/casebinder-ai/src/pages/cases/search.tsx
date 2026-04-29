@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Search as SearchIcon, FileText, Filter, CalendarPlus, Plus } from "lucide-react";
+import { VoiceButton } from "@/components/ui/voice-button";
 import { format } from "date-fns";
 import { 
   useListEvidence, 
@@ -120,10 +121,14 @@ export function EvidenceSearch({ params }: { params: { caseId: string } }) {
           <Input
             type="search"
             placeholder="Search filenames, content, people..."
-            className="pl-8"
+            className="pl-8 pr-9"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             data-testid="input-search-evidence"
+          />
+          <VoiceButton
+            className="absolute right-1.5 top-1/2 -translate-y-1/2"
+            onTranscript={(text) => setSearchQuery((prev) => prev ? prev + " " + text : text)}
           />
         </div>
         <Button variant="outline" className="w-full sm:w-auto">

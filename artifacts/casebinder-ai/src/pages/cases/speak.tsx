@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Mic, Save, FileText, Lightbulb, Loader2 } from "lucide-react";
+import { VoiceButton } from "@/components/ui/voice-button";
 import { 
   useListTranscripts, 
   getListTranscriptsQueryKey,
@@ -140,13 +141,19 @@ export function SpeakYourCase({ params }: { params: { caseId: string } }) {
             {isLoading ? (
               <Skeleton className="h-64 w-full" />
             ) : (
-              <Textarea
-                placeholder="Start typing your story here..."
-                className="min-h-[400px] resize-y text-base p-4"
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
-                data-testid="textarea-narrative"
-              />
+              <div className="relative">
+                <Textarea
+                  placeholder="Start typing your story here..."
+                  className="min-h-[400px] resize-y text-base p-4 pr-10"
+                  value={content}
+                  onChange={(e) => setContent(e.target.value)}
+                  data-testid="textarea-narrative"
+                />
+                <VoiceButton
+                  className="absolute top-2 right-2"
+                  onTranscript={(text) => setContent((prev) => prev ? prev + " " + text : text)}
+                />
+              </div>
             )}
           </CardContent>
           <CardFooter className="flex justify-between border-t p-4 bg-muted/20">

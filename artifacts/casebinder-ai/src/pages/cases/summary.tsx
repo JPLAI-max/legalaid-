@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Save, FileText, Loader2, Clock } from "lucide-react";
+import { VoiceButton } from "@/components/ui/voice-button";
 import { 
   useGetCaseSummary, 
   getGetCaseSummaryQueryKey,
@@ -72,13 +73,19 @@ export function CaseSummaryPage({ params }: { params: { caseId: string } }) {
           {isLoading ? (
             <Skeleton className="h-64 w-full" />
           ) : (
-            <Textarea
-              placeholder="State your main arguments, key facts, and what you are asking the court to decide..."
-              className="min-h-[400px] resize-y text-base p-4"
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              data-testid="textarea-summary"
-            />
+            <div className="relative">
+              <Textarea
+                placeholder="State your main arguments, key facts, and what you are asking the court to decide..."
+                className="min-h-[400px] resize-y text-base p-4 pr-10"
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
+                data-testid="textarea-summary"
+              />
+              <VoiceButton
+                className="absolute top-2 right-2"
+                onTranscript={(text) => setContent((prev) => prev ? prev + " " + text : text)}
+              />
+            </div>
           )}
         </CardContent>
         <CardFooter className="flex justify-between border-t p-4 bg-muted/20">
