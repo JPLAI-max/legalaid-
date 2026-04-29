@@ -1,0 +1,96 @@
+Build a responsive web app called CaseBinder AI.
+
+CaseBinder AI is a legal evidence organization tool. It helps users upload case evidence, search documents, create a chronological legal timeline, speak or type their case narrative, generate a neutral case summary, attach evidence to timeline events, and export an attorney-ready PDF packet.
+
+This is not a legal advice app. Include a disclaimer in the UI: “CaseBinder AI is an organization tool and does not provide legal advice.”
+
+Use Supabase for authentication, database, and file storage.
+
+Create these pages:
+
+1. Landing/Login Page
+- App name: CaseBinder AI
+- Headline: “Turn scattered case evidence into a searchable legal timeline.”
+- Buttons: Create Account, Log In
+- Disclaimer at bottom
+
+2. Case Dashboard
+- Show user’s cases as cards
+- Each card shows case name, case type, last updated, number of evidence files, number of timeline events
+- Button: New Case
+
+3. New Case Page
+- Form fields: case name, case type, parties involved, attorney name optional, short description
+- Case type dropdown: custody, divorce, contract dispute, employment, landlord/tenant, other
+- Button: Create Case
+
+4. Case Workspace
+- Left sidebar navigation: Overview, Evidence, Search, Timeline, Speak Your Case, Summary, Export
+- Header with case name and case type
+- Overview cards: evidence uploaded, timeline events, suggested events, export status
+
+5. Evidence Upload Page
+- Drag-and-drop upload area
+- Accept PDF, DOCX, TXT, JPG, PNG
+- Uploaded file table with filename, file type, upload date, detected date, processing status
+- Button: Process Evidence
+- Store uploaded files in Supabase storage
+- Store evidence metadata in database
+
+6. Evidence Library / Search Page
+- Search bar
+- Filters: date range, file type, person, tag
+- Results list showing date, filename, source type, text preview
+- Each result has button: Add to Timeline
+
+7. Speak Your Case Page
+- Large microphone record button
+- Text area for transcript
+- Buttons: Save Transcript, Generate Case Summary, Suggest Timeline Events
+- For now, allow typed transcript if browser recording is not available
+- Show generated summary in editable text box
+- Show suggested timeline events as cards
+
+8. Case Summary Page
+- Editable rich text field called “Summary of Position”
+- Button: Save Summary
+- This summary should appear at the beginning of the exported case packet
+
+9. Suggested Timeline Events Page
+- Cards with estimated date, title, description, people involved, confidence level, suggested search terms
+- Buttons: Add to Timeline, Edit, Ignore, Search Supporting Evidence
+
+10. Timeline Builder Page
+- Chronological list of events
+- Button: Add Event
+- Each event card shows date, title, summary, tags, attached evidence
+- Buttons: Edit, Attach Evidence, Delete
+
+11. Event Detail Page or Modal
+- Fields: event date, event time optional, title, description, attorney note, people involved, tags
+- Section to attach evidence from the evidence library
+- Button: Save Event
+
+12. Export Page
+- Preview export structure:
+  1. Cover Page
+  2. Case Summary
+  3. Chronological Timeline
+  4. Exhibit Index
+  5. Supporting Evidence
+- Buttons: Generate PDF, Download ZIP
+
+Database tables:
+- users
+- cases
+- evidence
+- timeline_events
+- event_evidence
+- transcripts
+- suggested_events
+- exports
+
+Use a clean professional design suitable for attorneys and court users.
+Color palette: white, charcoal, navy, light gray.
+Make the UI simple, calm, and organized.
+Prioritize usability over flashy design.

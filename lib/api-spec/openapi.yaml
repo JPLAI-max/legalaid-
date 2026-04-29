@@ -3,20 +3,32 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: CaseBinder AI API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: cases
+    description: Case management
+  - name: evidence
+    description: Evidence management
+  - name: timeline
+    description: Timeline events
+  - name: transcripts
+    description: Transcripts and AI
+  - name: exports
+    description: Export operations
+  - name: storage
+    description: Object storage
+
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,6 +36,754 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  # ── Cases ───────────────────────────────────────────────────────────────────
+  /cases:
+    get:
+      operationId: listCases
+      tags: [cases]
+      summary: List all cases for the authenticated user
+      responses:
+        "200":
+          description: List of cases
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Case"
+    post:
+      operationId: createCase
+      tags: [cases]
+      summary: Create a new case
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCaseBody"
+      responses:
+        "201":
+          description: Created case
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Case"
+
+  /cases/{caseId}:
+    get:
+      operationId: getCase
+      tags: [cases]
+      summary: Get a specific case
+      parameters:
+        - name: caseId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Case
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Case"
+    patch:
+      operationId: updateCase
+      tags: [cases]
+      summary: Update a case
+      parameters:
+        - name: caseId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateCaseBody"
+      responses:
+        "200":
+          description: Updated case
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Case"
+    delete:
+      operationId: deleteCase
+      tags: [cases]
+      summary: Delete a case
+      parameters:
+        - name: caseId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /cases/{caseId}/stats:
+    get:
+      operationId: getCaseStats
+      tags: [cases]
+      summary: Get case stats (evidence count, timeline events, export status)
+      parameters:
+        - name: caseId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Case statistics
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CaseStats"
+
+  # ── Evidence ─────────────────────────────────────────────────────────────────
+  /cases/{caseId}/evidence:
+    get:
+      operationId: listEvidence
+      tags: [evidence]
+      summary: List evidence for a case
+      parameters:
+        - name: caseId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: fileType
+          in: query
+          schema:
+            type: string
+        - name: dateFrom
+          in: query
+          schema:
+            type: string
+        - name: dateTo
+          in: query
+          schema:
+            type: string
+        - name: tag
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of evidence
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Evidence"
+    post:
+      operationId: createEvidence
+      tags: [evidence]
+      summary: Register evidence metadata after upload
+      parameters:
+        - name: caseId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateEvidenceBody"
+      responses:
+        "201":
+          description: Created evidence record
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Evidence"
+
+  /cases/{caseId}/evidence/{evidenceId}:
+    get:
+      operationId: getEvidence
+      tags: [evidence]
+      summary: Get a specific evidence item
+      parameters:
+        - name: caseId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: evidenceId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Evidence item
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Evidence"
+    patch:
+      operationId: updateEvidence
+      tags: [evidence]
+      summary: Update evidence metadata
+      parameters:
+        - name: caseId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: evidenceId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateEvidenceBody"
+      responses:
+        "200":
+          description: Updated evidence
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Evidence"
+    delete:
+      operationId: deleteEvidence
+      tags: [evidence]
+      summary: Delete evidence
+      parameters:
+        - name: caseId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: evidenceId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  # ── Timeline Events ──────────────────────────────────────────────────────────
+  /cases/{caseId}/events:
+    get:
+      operationId: listTimelineEvents
+      tags: [timeline]
+      summary: List timeline events for a case
+      parameters:
+        - name: caseId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of timeline events
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TimelineEvent"
+    post:
+      operationId: createTimelineEvent
+      tags: [timeline]
+      summary: Create a timeline event
+      parameters:
+        - name: caseId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateTimelineEventBody"
+      responses:
+        "201":
+          description: Created event
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TimelineEvent"
+
+  /cases/{caseId}/events/{eventId}:
+    get:
+      operationId: getTimelineEvent
+      tags: [timeline]
+      summary: Get a specific timeline event
+      parameters:
+        - name: caseId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: eventId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Timeline event
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TimelineEvent"
+    patch:
+      operationId: updateTimelineEvent
+      tags: [timeline]
+      summary: Update a timeline event
+      parameters:
+        - name: caseId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: eventId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateTimelineEventBody"
+      responses:
+        "200":
+          description: Updated event
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TimelineEvent"
+    delete:
+      operationId: deleteTimelineEvent
+      tags: [timeline]
+      summary: Delete a timeline event
+      parameters:
+        - name: caseId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: eventId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /cases/{caseId}/events/{eventId}/evidence:
+    get:
+      operationId: listEventEvidence
+      tags: [timeline]
+      summary: List evidence attached to a timeline event
+      parameters:
+        - name: caseId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: eventId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Evidence attached to event
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Evidence"
+    post:
+      operationId: attachEvidenceToEvent
+      tags: [timeline]
+      summary: Attach evidence to a timeline event
+      parameters:
+        - name: caseId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: eventId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AttachEvidenceBody"
+      responses:
+        "201":
+          description: Evidence attached
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                required: [success]
+
+  /cases/{caseId}/events/{eventId}/evidence/{evidenceId}:
+    delete:
+      operationId: detachEvidenceFromEvent
+      tags: [timeline]
+      summary: Detach evidence from a timeline event
+      parameters:
+        - name: caseId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: eventId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: evidenceId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Detached
+
+  # ── Transcripts ──────────────────────────────────────────────────────────────
+  /cases/{caseId}/transcripts:
+    get:
+      operationId: listTranscripts
+      tags: [transcripts]
+      summary: List transcripts for a case
+      parameters:
+        - name: caseId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of transcripts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Transcript"
+    post:
+      operationId: createTranscript
+      tags: [transcripts]
+      summary: Save a transcript
+      parameters:
+        - name: caseId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateTranscriptBody"
+      responses:
+        "201":
+          description: Created transcript
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Transcript"
+
+  /cases/{caseId}/transcripts/{transcriptId}:
+    patch:
+      operationId: updateTranscript
+      tags: [transcripts]
+      summary: Update transcript text
+      parameters:
+        - name: caseId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: transcriptId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateTranscriptBody"
+      responses:
+        "200":
+          description: Updated transcript
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Transcript"
+
+  /cases/{caseId}/ai/generate-summary:
+    post:
+      operationId: generateCaseSummary
+      tags: [transcripts]
+      summary: Generate a neutral case summary from transcript using AI
+      parameters:
+        - name: caseId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GenerateSummaryBody"
+      responses:
+        "200":
+          description: Generated summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GeneratedSummary"
+
+  /cases/{caseId}/ai/suggest-events:
+    post:
+      operationId: suggestTimelineEvents
+      tags: [transcripts]
+      summary: Suggest timeline events from transcript using AI
+      parameters:
+        - name: caseId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SuggestEventsBody"
+      responses:
+        "200":
+          description: Suggested events
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/SuggestedEvent"
+
+  /cases/{caseId}/suggested-events:
+    get:
+      operationId: listSuggestedEvents
+      tags: [transcripts]
+      summary: List saved suggested events for a case
+      parameters:
+        - name: caseId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Suggested events
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/SuggestedEvent"
+
+  /cases/{caseId}/suggested-events/{suggestedEventId}/accept:
+    post:
+      operationId: acceptSuggestedEvent
+      tags: [transcripts]
+      summary: Accept a suggested event (promote to timeline)
+      parameters:
+        - name: caseId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: suggestedEventId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "201":
+          description: Timeline event created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TimelineEvent"
+
+  /cases/{caseId}/suggested-events/{suggestedEventId}/ignore:
+    post:
+      operationId: ignoreSuggestedEvent
+      tags: [transcripts]
+      summary: Ignore a suggested event
+      parameters:
+        - name: caseId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: suggestedEventId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Ignored
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                required: [success]
+
+  /cases/{caseId}/summary:
+    get:
+      operationId: getCaseSummary
+      tags: [cases]
+      summary: Get the saved case summary
+      parameters:
+        - name: caseId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Case summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CaseSummary"
+    put:
+      operationId: saveCaseSummary
+      tags: [cases]
+      summary: Save the case summary
+      parameters:
+        - name: caseId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SaveCaseSummaryBody"
+      responses:
+        "200":
+          description: Saved summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CaseSummary"
+
+  # ── Exports ──────────────────────────────────────────────────────────────────
+  /cases/{caseId}/exports:
+    get:
+      operationId: listExports
+      tags: [exports]
+      summary: List exports for a case
+      parameters:
+        - name: caseId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of exports
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Export"
+    post:
+      operationId: createExport
+      tags: [exports]
+      summary: Create/trigger an export
+      parameters:
+        - name: caseId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateExportBody"
+      responses:
+        "201":
+          description: Export created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Export"
+
+  # ── Storage ──────────────────────────────────────────────────────────────────
+  /storage/uploads/request-url:
+    post:
+      operationId: requestUploadUrl
+      tags: [storage]
+      summary: Request a presigned upload URL
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RequestUploadUrlBody"
+      responses:
+        "200":
+          description: Presigned URL
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RequestUploadUrlResponse"
+
 components:
   schemas:
     HealthStatus:
@@ -31,6 +791,417 @@ components:
       properties:
         status:
           type: string
-      required:
-        - status
+      required: [status]
 
+    Case:
+      type: object
+      properties:
+        id:
+          type: integer
+        userId:
+          type: string
+        name:
+          type: string
+        caseType:
+          type: string
+          enum: [custody, divorce, contract_dispute, employment, landlord_tenant, other]
+        parties:
+          type: string
+        attorneyName:
+          type: string
+          nullable: true
+        description:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+      required: [id, userId, name, caseType, parties, createdAt, updatedAt]
+
+    CreateCaseBody:
+      type: object
+      properties:
+        name:
+          type: string
+        caseType:
+          type: string
+          enum: [custody, divorce, contract_dispute, employment, landlord_tenant, other]
+        parties:
+          type: string
+        attorneyName:
+          type: string
+          nullable: true
+        description:
+          type: string
+          nullable: true
+      required: [name, caseType, parties]
+
+    UpdateCaseBody:
+      type: object
+      properties:
+        name:
+          type: string
+        caseType:
+          type: string
+          enum: [custody, divorce, contract_dispute, employment, landlord_tenant, other]
+        parties:
+          type: string
+        attorneyName:
+          type: string
+          nullable: true
+        description:
+          type: string
+          nullable: true
+
+    CaseStats:
+      type: object
+      properties:
+        caseId:
+          type: integer
+        evidenceCount:
+          type: integer
+        timelineEventCount:
+          type: integer
+        suggestedEventCount:
+          type: integer
+        exportCount:
+          type: integer
+        lastExportStatus:
+          type: string
+          nullable: true
+      required: [caseId, evidenceCount, timelineEventCount, suggestedEventCount, exportCount]
+
+    Evidence:
+      type: object
+      properties:
+        id:
+          type: integer
+        caseId:
+          type: integer
+        filename:
+          type: string
+        fileType:
+          type: string
+        objectPath:
+          type: string
+        fileSize:
+          type: integer
+          nullable: true
+        detectedDate:
+          type: string
+          nullable: true
+        processingStatus:
+          type: string
+          enum: [pending, processing, processed, failed]
+        textPreview:
+          type: string
+          nullable: true
+        tags:
+          type: array
+          items:
+            type: string
+        people:
+          type: array
+          items:
+            type: string
+        uploadedAt:
+          type: string
+      required: [id, caseId, filename, fileType, objectPath, processingStatus, tags, people, uploadedAt]
+
+    CreateEvidenceBody:
+      type: object
+      properties:
+        filename:
+          type: string
+        fileType:
+          type: string
+        objectPath:
+          type: string
+        fileSize:
+          type: integer
+          nullable: true
+        detectedDate:
+          type: string
+          nullable: true
+        tags:
+          type: array
+          items:
+            type: string
+        people:
+          type: array
+          items:
+            type: string
+      required: [filename, fileType, objectPath]
+
+    UpdateEvidenceBody:
+      type: object
+      properties:
+        detectedDate:
+          type: string
+          nullable: true
+        processingStatus:
+          type: string
+          enum: [pending, processing, processed, failed]
+        textPreview:
+          type: string
+          nullable: true
+        tags:
+          type: array
+          items:
+            type: string
+        people:
+          type: array
+          items:
+            type: string
+
+    TimelineEvent:
+      type: object
+      properties:
+        id:
+          type: integer
+        caseId:
+          type: integer
+        eventDate:
+          type: string
+        eventTime:
+          type: string
+          nullable: true
+        title:
+          type: string
+        description:
+          type: string
+          nullable: true
+        attorneyNote:
+          type: string
+          nullable: true
+        people:
+          type: array
+          items:
+            type: string
+        tags:
+          type: array
+          items:
+            type: string
+        createdAt:
+          type: string
+      required: [id, caseId, eventDate, title, people, tags, createdAt]
+
+    CreateTimelineEventBody:
+      type: object
+      properties:
+        eventDate:
+          type: string
+        eventTime:
+          type: string
+          nullable: true
+        title:
+          type: string
+        description:
+          type: string
+          nullable: true
+        attorneyNote:
+          type: string
+          nullable: true
+        people:
+          type: array
+          items:
+            type: string
+        tags:
+          type: array
+          items:
+            type: string
+      required: [eventDate, title]
+
+    UpdateTimelineEventBody:
+      type: object
+      properties:
+        eventDate:
+          type: string
+        eventTime:
+          type: string
+          nullable: true
+        title:
+          type: string
+        description:
+          type: string
+          nullable: true
+        attorneyNote:
+          type: string
+          nullable: true
+        people:
+          type: array
+          items:
+            type: string
+        tags:
+          type: array
+          items:
+            type: string
+
+    AttachEvidenceBody:
+      type: object
+      properties:
+        evidenceId:
+          type: integer
+      required: [evidenceId]
+
+    Transcript:
+      type: object
+      properties:
+        id:
+          type: integer
+        caseId:
+          type: integer
+        content:
+          type: string
+        source:
+          type: string
+          enum: [typed, microphone]
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+      required: [id, caseId, content, source, createdAt, updatedAt]
+
+    CreateTranscriptBody:
+      type: object
+      properties:
+        content:
+          type: string
+        source:
+          type: string
+          enum: [typed, microphone]
+      required: [content, source]
+
+    UpdateTranscriptBody:
+      type: object
+      properties:
+        content:
+          type: string
+
+    GenerateSummaryBody:
+      type: object
+      properties:
+        transcriptId:
+          type: integer
+        additionalContext:
+          type: string
+          nullable: true
+      required: [transcriptId]
+
+    GeneratedSummary:
+      type: object
+      properties:
+        summary:
+          type: string
+        suggestedTitle:
+          type: string
+          nullable: true
+      required: [summary]
+
+    SuggestEventsBody:
+      type: object
+      properties:
+        transcriptId:
+          type: integer
+      required: [transcriptId]
+
+    SuggestedEvent:
+      type: object
+      properties:
+        id:
+          type: integer
+        caseId:
+          type: integer
+        estimatedDate:
+          type: string
+          nullable: true
+        title:
+          type: string
+        description:
+          type: string
+        people:
+          type: array
+          items:
+            type: string
+        confidenceLevel:
+          type: string
+          enum: [low, medium, high]
+        suggestedSearchTerms:
+          type: array
+          items:
+            type: string
+        status:
+          type: string
+          enum: [pending, accepted, ignored]
+        createdAt:
+          type: string
+      required: [id, caseId, title, description, people, confidenceLevel, suggestedSearchTerms, status, createdAt]
+
+    CaseSummary:
+      type: object
+      properties:
+        id:
+          type: integer
+        caseId:
+          type: integer
+        content:
+          type: string
+        updatedAt:
+          type: string
+      required: [id, caseId, content, updatedAt]
+
+    SaveCaseSummaryBody:
+      type: object
+      properties:
+        content:
+          type: string
+      required: [content]
+
+    Export:
+      type: object
+      properties:
+        id:
+          type: integer
+        caseId:
+          type: integer
+        exportType:
+          type: string
+          enum: [pdf, zip]
+        status:
+          type: string
+          enum: [pending, processing, completed, failed]
+        objectPath:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+      required: [id, caseId, exportType, status, createdAt]
+
+    CreateExportBody:
+      type: object
+      properties:
+        exportType:
+          type: string
+          enum: [pdf, zip]
+      required: [exportType]
+
+    RequestUploadUrlBody:
+      type: object
+      properties:
+        name:
+          type: string
+        size:
+          type: integer
+        contentType:
+          type: string
+      required: [name, size, contentType]
+
+    RequestUploadUrlResponse:
+      type: object
+      properties:
+        uploadURL:
+          type: string
+        objectPath:
+          type: string
+      required: [uploadURL, objectPath]
