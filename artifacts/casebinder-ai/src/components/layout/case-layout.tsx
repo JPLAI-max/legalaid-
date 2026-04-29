@@ -105,7 +105,7 @@ export function CaseLayout({ children, params }: CaseLayoutProps) {
       </div>
       
       <footer className="py-4 px-4 md:px-8 border-t bg-muted/30 text-center text-xs text-muted-foreground mt-auto">
-        <p>CaseBinder AI is an organization tool and does not provide legal advice.</p>
+        <p>Legal Aid is an organization tool and does not provide legal advice.</p>
       </footer>
     </div>
   );

@@ -87,7 +87,7 @@ function SignInPage() {
     <div className="flex min-h-[100dvh] flex-col items-center justify-center bg-gray-50 px-4 py-12">
       <div className="mb-8 flex flex-col items-center text-center">
         <h1 className="text-3xl font-bold text-slate-900">Welcome Back</h1>
-        <p className="mt-2 text-slate-600">Sign in to your CaseBinder AI account</p>
+        <p className="mt-2 text-slate-600">Sign in to your Legal Aid account</p>
       </div>
       <SignIn routing="path" path={`${basePath}/sign-in`} signUpUrl={`${basePath}/sign-up`} />
     </div>
@@ -98,7 +98,7 @@ function SignUpPage() {
   return (
     <div className="flex min-h-[100dvh] flex-col items-center justify-center bg-gray-50 px-4 py-12">
       <div className="mb-8 flex flex-col items-center text-center">
-        <h1 className="text-3xl font-bold text-slate-900">Create an Account</h1>
+        <h1 className="text-3xl font-bold text-slate-900">Join Legal Aid</h1>
         <p className="mt-2 text-slate-600">Start organizing your legal case today</p>
       </div>
       <SignUp routing="path" path={`${basePath}/sign-up`} signInUrl={`${basePath}/sign-in`} />
@@ -180,13 +180,13 @@ function ClerkProviderWithRoutes() {
         signIn: {
           start: {
             title: "Sign In",
-            subtitle: "Access your CaseBinder AI workspace",
+            subtitle: "Access your Legal Aid workspace",
           },
         },
         signUp: {
           start: {
             title: "Sign Up",
-            subtitle: "Create your CaseBinder AI workspace",
+            subtitle: "Create your Legal Aid workspace",
           },
         },
       }}

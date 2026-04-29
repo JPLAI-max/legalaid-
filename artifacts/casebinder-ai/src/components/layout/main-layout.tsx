@@ -12,7 +12,7 @@ export function MainLayout({ children }: MainLayoutProps) {
         {children}
       </main>
       <footer className="py-6 px-4 md:px-8 border-t bg-muted/30 text-center text-sm text-muted-foreground">
-        <p>CaseBinder AI is an organization tool and does not provide legal advice.</p>
+        <p>Legal Aid is an organization tool and does not provide legal advice.</p>
       </footer>
     </div>
   );

@@ -9,7 +9,7 @@ export function Home() {
       <section className="w-full py-12 md:py-24 lg:py-32 xl:py-48 flex flex-col items-center justify-center text-center">
         <div className="space-y-6 max-w-3xl">
           <div className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-secondary text-secondary-foreground shadow">
-            CaseBinder AI
+            Legal Aid
           </div>
           <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl text-foreground">
             Turn scattered case evidence into a searchable legal timeline.
