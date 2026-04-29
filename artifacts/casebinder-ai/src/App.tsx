@@ -19,6 +19,7 @@ import { SpeakYourCase } from "@/pages/cases/speak";
 import { CaseSummaryPage } from "@/pages/cases/summary";
 import { SuggestedEventsPage } from "@/pages/cases/suggested-events";
 import { ExportPage } from "@/pages/cases/export";
+import { EmailImportPage } from "@/pages/cases/email-import";
 import NotFound from "@/pages/not-found";
 
 const queryClient = new QueryClient();
@@ -211,6 +212,7 @@ function ClerkProviderWithRoutes() {
           <ProtectedRoute path="/cases/:caseId/summary" component={CaseSummaryPage} layout={CaseLayout} />
           <ProtectedRoute path="/cases/:caseId/suggested-events" component={SuggestedEventsPage} layout={CaseLayout} />
           <ProtectedRoute path="/cases/:caseId/export" component={ExportPage} layout={CaseLayout} />
+          <ProtectedRoute path="/cases/:caseId/email-import" component={EmailImportPage} layout={CaseLayout} />
 
           <Route component={NotFound} />
         </Switch>

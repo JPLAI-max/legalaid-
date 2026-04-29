@@ -27,12 +27,17 @@ import type {
   CreateExportBody,
   CreateTimelineEventBody,
   CreateTranscriptBody,
+  EmailConnection,
+  EmailSearchBody,
+  EmailSearchResult,
   Evidence,
   Export,
   GenerateSummaryBody,
   GeneratedSummary,
   HealthStatus,
   IgnoreSuggestedEvent200,
+  ImportEmailsBody,
+  ImportedEmail,
   ListEvidenceParams,
   RequestUploadUrlBody,
   RequestUploadUrlResponse,
@@ -2987,3 +2992,424 @@ export const useRequestUploadUrl = <
 > => {
   return useMutation(getRequestUploadUrlMutationOptions(options));
 };
+
+/**
+ * @summary List connected email accounts for the current user
+ */
+export const getListEmailConnectionsUrl = () => {
+  return `/api/email/connections`;
+};
+
+export const listEmailConnections = async (
+  options?: RequestInit,
+): Promise<EmailConnection[]> => {
+  return customFetch<EmailConnection[]>(getListEmailConnectionsUrl(), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getListEmailConnectionsQueryKey = () => {
+  return [`/api/email/connections`] as const;
+};
+
+export const getListEmailConnectionsQueryOptions = <
+  TData = Awaited<ReturnType<typeof listEmailConnections>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof listEmailConnections>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getListEmailConnectionsQueryKey();
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof listEmailConnections>>
+  > = ({ signal }) => listEmailConnections({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof listEmailConnections>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type ListEmailConnectionsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof listEmailConnections>>
+>;
+export type ListEmailConnectionsQueryError = ErrorType<unknown>;
+
+/**
+ * @summary List connected email accounts for the current user
+ */
+
+export function useListEmailConnections<
+  TData = Awaited<ReturnType<typeof listEmailConnections>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof listEmailConnections>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getListEmailConnectionsQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Disconnect an email account
+ */
+export const getDeleteEmailConnectionUrl = (connectionId: number) => {
+  return `/api/email/connections/${connectionId}`;
+};
+
+export const deleteEmailConnection = async (
+  connectionId: number,
+  options?: RequestInit,
+): Promise<void> => {
+  return customFetch<void>(getDeleteEmailConnectionUrl(connectionId), {
+    ...options,
+    method: "DELETE",
+  });
+};
+
+export const getDeleteEmailConnectionMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof deleteEmailConnection>>,
+    TError,
+    { connectionId: number },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof deleteEmailConnection>>,
+  TError,
+  { connectionId: number },
+  TContext
+> => {
+  const mutationKey = ["deleteEmailConnection"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof deleteEmailConnection>>,
+    { connectionId: number }
+  > = (props) => {
+    const { connectionId } = props ?? {};
+
+    return deleteEmailConnection(connectionId, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type DeleteEmailConnectionMutationResult = NonNullable<
+  Awaited<ReturnType<typeof deleteEmailConnection>>
+>;
+
+export type DeleteEmailConnectionMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Disconnect an email account
+ */
+export const useDeleteEmailConnection = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof deleteEmailConnection>>,
+    TError,
+    { connectionId: number },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof deleteEmailConnection>>,
+  TError,
+  { connectionId: number },
+  TContext
+> => {
+  return useMutation(getDeleteEmailConnectionMutationOptions(options));
+};
+
+/**
+ * @summary Search emails via connected account
+ */
+export const getSearchCaseEmailsUrl = (caseId: number) => {
+  return `/api/cases/${caseId}/emails/search`;
+};
+
+export const searchCaseEmails = async (
+  caseId: number,
+  emailSearchBody: EmailSearchBody,
+  options?: RequestInit,
+): Promise<EmailSearchResult[]> => {
+  return customFetch<EmailSearchResult[]>(getSearchCaseEmailsUrl(caseId), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(emailSearchBody),
+  });
+};
+
+export const getSearchCaseEmailsMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof searchCaseEmails>>,
+    TError,
+    { caseId: number; data: BodyType<EmailSearchBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof searchCaseEmails>>,
+  TError,
+  { caseId: number; data: BodyType<EmailSearchBody> },
+  TContext
+> => {
+  const mutationKey = ["searchCaseEmails"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof searchCaseEmails>>,
+    { caseId: number; data: BodyType<EmailSearchBody> }
+  > = (props) => {
+    const { caseId, data } = props ?? {};
+
+    return searchCaseEmails(caseId, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type SearchCaseEmailsMutationResult = NonNullable<
+  Awaited<ReturnType<typeof searchCaseEmails>>
+>;
+export type SearchCaseEmailsMutationBody = BodyType<EmailSearchBody>;
+export type SearchCaseEmailsMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Search emails via connected account
+ */
+export const useSearchCaseEmails = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof searchCaseEmails>>,
+    TError,
+    { caseId: number; data: BodyType<EmailSearchBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof searchCaseEmails>>,
+  TError,
+  { caseId: number; data: BodyType<EmailSearchBody> },
+  TContext
+> => {
+  return useMutation(getSearchCaseEmailsMutationOptions(options));
+};
+
+/**
+ * @summary Import selected emails as evidence
+ */
+export const getImportCaseEmailsUrl = (caseId: number) => {
+  return `/api/cases/${caseId}/emails/import`;
+};
+
+export const importCaseEmails = async (
+  caseId: number,
+  importEmailsBody: ImportEmailsBody,
+  options?: RequestInit,
+): Promise<ImportedEmail[]> => {
+  return customFetch<ImportedEmail[]>(getImportCaseEmailsUrl(caseId), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(importEmailsBody),
+  });
+};
+
+export const getImportCaseEmailsMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof importCaseEmails>>,
+    TError,
+    { caseId: number; data: BodyType<ImportEmailsBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof importCaseEmails>>,
+  TError,
+  { caseId: number; data: BodyType<ImportEmailsBody> },
+  TContext
+> => {
+  const mutationKey = ["importCaseEmails"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof importCaseEmails>>,
+    { caseId: number; data: BodyType<ImportEmailsBody> }
+  > = (props) => {
+    const { caseId, data } = props ?? {};
+
+    return importCaseEmails(caseId, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type ImportCaseEmailsMutationResult = NonNullable<
+  Awaited<ReturnType<typeof importCaseEmails>>
+>;
+export type ImportCaseEmailsMutationBody = BodyType<ImportEmailsBody>;
+export type ImportCaseEmailsMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Import selected emails as evidence
+ */
+export const useImportCaseEmails = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof importCaseEmails>>,
+    TError,
+    { caseId: number; data: BodyType<ImportEmailsBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof importCaseEmails>>,
+  TError,
+  { caseId: number; data: BodyType<ImportEmailsBody> },
+  TContext
+> => {
+  return useMutation(getImportCaseEmailsMutationOptions(options));
+};
+
+/**
+ * @summary List imported emails for a case
+ */
+export const getListImportedEmailsUrl = (caseId: number) => {
+  return `/api/cases/${caseId}/emails`;
+};
+
+export const listImportedEmails = async (
+  caseId: number,
+  options?: RequestInit,
+): Promise<ImportedEmail[]> => {
+  return customFetch<ImportedEmail[]>(getListImportedEmailsUrl(caseId), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getListImportedEmailsQueryKey = (caseId: number) => {
+  return [`/api/cases/${caseId}/emails`] as const;
+};
+
+export const getListImportedEmailsQueryOptions = <
+  TData = Awaited<ReturnType<typeof listImportedEmails>>,
+  TError = ErrorType<unknown>,
+>(
+  caseId: number,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof listImportedEmails>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getListImportedEmailsQueryKey(caseId);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof listImportedEmails>>
+  > = ({ signal }) => listImportedEmails(caseId, { signal, ...requestOptions });
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: !!caseId,
+    ...queryOptions,
+  } as UseQueryOptions<
+    Awaited<ReturnType<typeof listImportedEmails>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type ListImportedEmailsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof listImportedEmails>>
+>;
+export type ListImportedEmailsQueryError = ErrorType<unknown>;
+
+/**
+ * @summary List imported emails for a case
+ */
+
+export function useListImportedEmails<
+  TData = Awaited<ReturnType<typeof listImportedEmails>>,
+  TError = ErrorType<unknown>,
+>(
+  caseId: number,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof listImportedEmails>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getListImportedEmailsQueryOptions(caseId, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}

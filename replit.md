@@ -56,6 +56,19 @@ lib/
 - `suggested_events` — AI-suggested timeline events from transcripts
 - `case_summaries` — AI-generated / user-edited case summaries
 - `exports` — export job records (pdf/zip)
+- `email_connections` — OAuth tokens for Gmail / Outlook accounts per user
+- `email_metadata` — full metadata for imported emails (linked to evidence)
+
+## Features
+
+- Case management (create, edit, list cases)
+- Evidence upload (file upload via object storage, OCR, tagging, people)
+- Evidence search (full-text, filters)
+- Timeline builder (manual + AI-suggested events, evidence linking)
+- Speak Your Case (microphone + voice dictation for all text fields)
+- AI Case Summary (OpenAI-powered neutral summary + narrative)
+- Export (PDF + ZIP attorney-ready packet)
+- Email Import (Gmail + Outlook OAuth, search filters, selective import as evidence)
 
 ## Environment Variables
 
@@ -64,3 +77,13 @@ lib/
 - `DEFAULT_OBJECT_STORAGE_BUCKET_ID`, `PUBLIC_OBJECT_SEARCH_PATHS`, `PRIVATE_OBJECT_DIR` — Object storage
 - `AI_INTEGRATIONS_OPENAI_BASE_URL`, `AI_INTEGRATIONS_OPENAI_API_KEY` — OpenAI via Replit AI Integrations
 - `SESSION_SECRET` — Session secret
+- `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` — Gmail OAuth (optional, for Email Import)
+- `MICROSOFT_CLIENT_ID`, `MICROSOFT_CLIENT_SECRET` — Outlook OAuth (optional, for Email Import)
+
+## Email Import OAuth Setup
+
+To enable Email Import, register OAuth apps and set the above secrets:
+- Gmail: Google Cloud Console → APIs & Services → OAuth 2.0 → redirect URI `https://YOUR_DOMAIN/api/email/oauth/callback/gmail`
+- Outlook: Azure Portal → App Registrations → redirect URI `https://YOUR_DOMAIN/api/email/oauth/callback/outlook`
+
+The feature gracefully shows a setup guide in-app if credentials are missing.

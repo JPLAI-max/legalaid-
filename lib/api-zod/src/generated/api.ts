@@ -616,3 +616,95 @@ export const RequestUploadUrlResponse = zod.object({
   uploadURL: zod.string(),
   objectPath: zod.string(),
 });
+
+/**
+ * @summary List connected email accounts for the current user
+ */
+export const ListEmailConnectionsResponseItem = zod.object({
+  id: zod.number(),
+  provider: zod.enum(["gmail", "outlook"]),
+  email: zod.string(),
+  connectedAt: zod.string(),
+});
+export const ListEmailConnectionsResponse = zod.array(
+  ListEmailConnectionsResponseItem,
+);
+
+/**
+ * @summary Disconnect an email account
+ */
+export const DeleteEmailConnectionParams = zod.object({
+  connectionId: zod.coerce.number(),
+});
+
+/**
+ * @summary Search emails via connected account
+ */
+export const SearchCaseEmailsParams = zod.object({
+  caseId: zod.coerce.number(),
+});
+
+export const SearchCaseEmailsBody = zod.object({
+  connectionId: zod.number(),
+  from: zod.string().nullish(),
+  to: zod.string().nullish(),
+  subject: zod.string().nullish(),
+  keyword: zod.string().nullish(),
+  dateFrom: zod.string().nullish(),
+  dateTo: zod.string().nullish(),
+  hasAttachment: zod.boolean().nullish(),
+  folder: zod.string().nullish(),
+  maxResults: zod.number().nullish(),
+});
+
+export const SearchCaseEmailsResponseItem = zod.object({
+  externalId: zod.string(),
+  provider: zod.string(),
+  date: zod.string().nullish(),
+  from: zod.string().nullish(),
+  to: zod.string().nullish(),
+  subject: zod.string().nullish(),
+  snippet: zod.string().nullish(),
+  hasAttachment: zod.boolean(),
+  labelIds: zod.array(zod.string()).nullish(),
+});
+export const SearchCaseEmailsResponse = zod.array(SearchCaseEmailsResponseItem);
+
+/**
+ * @summary Import selected emails as evidence
+ */
+export const ImportCaseEmailsParams = zod.object({
+  caseId: zod.coerce.number(),
+});
+
+export const ImportCaseEmailsBody = zod.object({
+  connectionId: zod.number(),
+  emailIds: zod.array(zod.string()),
+  tags: zod.array(zod.string()).nullish(),
+});
+
+/**
+ * @summary List imported emails for a case
+ */
+export const ListImportedEmailsParams = zod.object({
+  caseId: zod.coerce.number(),
+});
+
+export const ListImportedEmailsResponseItem = zod.object({
+  id: zod.number(),
+  evidenceId: zod.number(),
+  provider: zod.string(),
+  externalId: zod.string().nullish(),
+  sender: zod.string().nullish(),
+  recipients: zod.string().nullish(),
+  subject: zod.string().nullish(),
+  snippet: zod.string().nullish(),
+  bodyText: zod.string().nullish(),
+  hasAttachment: zod.boolean(),
+  attachmentMetadata: zod.string().nullish(),
+  emailDate: zod.string().nullish(),
+  importedAt: zod.string(),
+});
+export const ListImportedEmailsResponse = zod.array(
+  ListImportedEmailsResponseItem,
+);

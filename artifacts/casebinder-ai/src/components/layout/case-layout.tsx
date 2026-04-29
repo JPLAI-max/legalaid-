@@ -8,6 +8,7 @@ import {
   FileText, 
   Lightbulb, 
   Download,
+  Mail,
   ChevronLeft
 } from "lucide-react";
 import { useGetCase } from "@workspace/api-client-react";
@@ -37,6 +38,7 @@ export function CaseLayout({ children, params }: CaseLayoutProps) {
     { name: "Summary", href: `/cases/${caseId}/summary`, icon: FileText },
     { name: "Suggested Events", href: `/cases/${caseId}/suggested-events`, icon: Lightbulb },
     { name: "Export", href: `/cases/${caseId}/export`, icon: Download },
+    { name: "Email Import", href: `/cases/${caseId}/email-import`, icon: Mail },
   ];
 
   return (

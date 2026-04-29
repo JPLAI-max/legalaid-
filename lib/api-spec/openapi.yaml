@@ -22,6 +22,8 @@ tags:
     description: Export operations
   - name: storage
     description: Object storage
+  - name: email
+    description: Email import operations
 
 paths:
   /healthz:
@@ -784,6 +786,112 @@ paths:
               schema:
                 $ref: "#/components/schemas/RequestUploadUrlResponse"
 
+  # ── Email Import ─────────────────────────────────────────────────────────────
+  /email/connections:
+    get:
+      operationId: listEmailConnections
+      tags: [email]
+      summary: List connected email accounts for the current user
+      responses:
+        "200":
+          description: List of email connections
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/EmailConnection"
+
+  /email/connections/{connectionId}:
+    delete:
+      operationId: deleteEmailConnection
+      tags: [email]
+      summary: Disconnect an email account
+      parameters:
+        - name: connectionId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Disconnected
+
+  /cases/{caseId}/emails/search:
+    post:
+      operationId: searchCaseEmails
+      tags: [email]
+      summary: Search emails via connected account
+      parameters:
+        - name: caseId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EmailSearchBody"
+      responses:
+        "200":
+          description: Matching emails
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/EmailSearchResult"
+
+  /cases/{caseId}/emails/import:
+    post:
+      operationId: importCaseEmails
+      tags: [email]
+      summary: Import selected emails as evidence
+      parameters:
+        - name: caseId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ImportEmailsBody"
+      responses:
+        "201":
+          description: Imported evidence records
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ImportedEmail"
+
+  /cases/{caseId}/emails:
+    get:
+      operationId: listImportedEmails
+      tags: [email]
+      summary: List imported emails for a case
+      parameters:
+        - name: caseId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of imported emails
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ImportedEmail"
+
 components:
   schemas:
     HealthStatus:
@@ -1205,3 +1313,137 @@ components:
         objectPath:
           type: string
       required: [uploadURL, objectPath]
+
+    EmailConnection:
+      type: object
+      properties:
+        id:
+          type: integer
+        provider:
+          type: string
+          enum: [gmail, outlook]
+        email:
+          type: string
+        connectedAt:
+          type: string
+      required: [id, provider, email, connectedAt]
+
+    EmailSearchBody:
+      type: object
+      properties:
+        connectionId:
+          type: integer
+        from:
+          type: string
+          nullable: true
+        to:
+          type: string
+          nullable: true
+        subject:
+          type: string
+          nullable: true
+        keyword:
+          type: string
+          nullable: true
+        dateFrom:
+          type: string
+          nullable: true
+        dateTo:
+          type: string
+          nullable: true
+        hasAttachment:
+          type: boolean
+          nullable: true
+        folder:
+          type: string
+          nullable: true
+        maxResults:
+          type: integer
+          nullable: true
+      required: [connectionId]
+
+    EmailSearchResult:
+      type: object
+      properties:
+        externalId:
+          type: string
+        provider:
+          type: string
+        date:
+          type: string
+          nullable: true
+        from:
+          type: string
+          nullable: true
+        to:
+          type: string
+          nullable: true
+        subject:
+          type: string
+          nullable: true
+        snippet:
+          type: string
+          nullable: true
+        hasAttachment:
+          type: boolean
+        labelIds:
+          type: array
+          nullable: true
+          items:
+            type: string
+      required: [externalId, provider, hasAttachment]
+
+    ImportEmailsBody:
+      type: object
+      properties:
+        connectionId:
+          type: integer
+        emailIds:
+          type: array
+          items:
+            type: string
+        tags:
+          type: array
+          nullable: true
+          items:
+            type: string
+      required: [connectionId, emailIds]
+
+    ImportedEmail:
+      type: object
+      properties:
+        id:
+          type: integer
+        evidenceId:
+          type: integer
+        provider:
+          type: string
+        externalId:
+          type: string
+          nullable: true
+        sender:
+          type: string
+          nullable: true
+        recipients:
+          type: string
+          nullable: true
+        subject:
+          type: string
+          nullable: true
+        snippet:
+          type: string
+          nullable: true
+        bodyText:
+          type: string
+          nullable: true
+        hasAttachment:
+          type: boolean
+        attachmentMetadata:
+          type: string
+          nullable: true
+        emailDate:
+          type: string
+          nullable: true
+        importedAt:
+          type: string
+      required: [id, evidenceId, provider, hasAttachment, importedAt]

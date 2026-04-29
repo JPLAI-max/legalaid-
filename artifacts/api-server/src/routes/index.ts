@@ -6,6 +6,7 @@ import timelineRouter from "./timeline";
 import transcriptsRouter from "./transcripts";
 import exportsRouter from "./exports";
 import storageRouter from "./storage";
+import emailRouter from "./email";
 
 const router: IRouter = Router();
 
@@ -16,5 +17,6 @@ router.use(timelineRouter);
 router.use(transcriptsRouter);
 router.use(exportsRouter);
 router.use(storageRouter);
+router.use(emailRouter);
 
 export default router;

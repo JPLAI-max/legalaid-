@@ -310,6 +310,68 @@ export interface RequestUploadUrlResponse {
   objectPath: string;
 }
 
+export type EmailConnectionProvider =
+  (typeof EmailConnectionProvider)[keyof typeof EmailConnectionProvider];
+
+export const EmailConnectionProvider = {
+  gmail: "gmail",
+  outlook: "outlook",
+} as const;
+
+export interface EmailConnection {
+  id: number;
+  provider: EmailConnectionProvider;
+  email: string;
+  connectedAt: string;
+}
+
+export interface EmailSearchBody {
+  connectionId: number;
+  from?: string | null;
+  to?: string | null;
+  subject?: string | null;
+  keyword?: string | null;
+  dateFrom?: string | null;
+  dateTo?: string | null;
+  hasAttachment?: boolean | null;
+  folder?: string | null;
+  maxResults?: number | null;
+}
+
+export interface EmailSearchResult {
+  externalId: string;
+  provider: string;
+  date?: string | null;
+  from?: string | null;
+  to?: string | null;
+  subject?: string | null;
+  snippet?: string | null;
+  hasAttachment: boolean;
+  labelIds?: string[] | null;
+}
+
+export interface ImportEmailsBody {
+  connectionId: number;
+  emailIds: string[];
+  tags?: string[] | null;
+}
+
+export interface ImportedEmail {
+  id: number;
+  evidenceId: number;
+  provider: string;
+  externalId?: string | null;
+  sender?: string | null;
+  recipients?: string | null;
+  subject?: string | null;
+  snippet?: string | null;
+  bodyText?: string | null;
+  hasAttachment: boolean;
+  attachmentMetadata?: string | null;
+  emailDate?: string | null;
+  importedAt: string;
+}
+
 export type ListEvidenceParams = {
   search?: string;
   fileType?: string;
