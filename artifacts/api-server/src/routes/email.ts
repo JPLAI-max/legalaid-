@@ -7,7 +7,7 @@ import {
   casesTable,
 } from "@workspace/db";
 import { eq, and } from "drizzle-orm";
-import { requireAuth } from "@clerk/express";
+import { requireApiAuth } from "../middlewares/requireApiAuth";
 import { z } from "zod";
 
 const router = Router({ mergeParams: true });
@@ -160,7 +160,7 @@ const ImportEmailsBodySchema = z.object({
 
 // ─── OAuth: start ─────────────────────────────────────────────────────────────
 
-router.get("/email/oauth/connect/:provider", requireAuth(), (req, res) => {
+router.get("/email/oauth/connect/:provider", requireApiAuth(), (req, res) => {
   const provider = req.params.provider;
   const userId = req.auth.userId!;
   const returnPath = (req.query.returnPath as string) ?? "/dashboard";
@@ -345,7 +345,7 @@ router.get("/email/oauth/callback/:provider", async (req, res) => {
 
 // ─── List connections ─────────────────────────────────────────────────────────
 
-router.get("/email/connections", requireAuth(), async (req, res) => {
+router.get("/email/connections", requireApiAuth(), async (req, res) => {
   const userId = req.auth.userId!;
   const connections = await db
     .select({
@@ -361,7 +361,7 @@ router.get("/email/connections", requireAuth(), async (req, res) => {
 
 // ─── Delete connection ────────────────────────────────────────────────────────
 
-router.delete("/email/connections/:connectionId", requireAuth(), async (req, res) => {
+router.delete("/email/connections/:connectionId", requireApiAuth(), async (req, res) => {
   const userId = req.auth.userId!;
   const connectionId = Number(req.params.connectionId);
   await db
@@ -377,7 +377,7 @@ router.delete("/email/connections/:connectionId", requireAuth(), async (req, res
 
 // ─── Search ───────────────────────────────────────────────────────────────────
 
-router.post("/cases/:caseId/emails/search", requireAuth(), async (req, res) => {
+router.post("/cases/:caseId/emails/search", requireApiAuth(), async (req, res) => {
   const userId = req.auth.userId!;
   const caseId = Number(req.params.caseId);
   if (!(await verifyCase(userId, caseId))) return res.status(404).json({ error: "Case not found" });
@@ -494,7 +494,7 @@ router.post("/cases/:caseId/emails/search", requireAuth(), async (req, res) => {
 
 // ─── Import ───────────────────────────────────────────────────────────────────
 
-router.post("/cases/:caseId/emails/import", requireAuth(), async (req, res) => {
+router.post("/cases/:caseId/emails/import", requireApiAuth(), async (req, res) => {
   const userId = req.auth.userId!;
   const caseId = Number(req.params.caseId);
   if (!(await verifyCase(userId, caseId))) return res.status(404).json({ error: "Case not found" });
@@ -627,7 +627,7 @@ router.post("/cases/:caseId/emails/import", requireAuth(), async (req, res) => {
 
 // ─── List imported emails ─────────────────────────────────────────────────────
 
-router.get("/cases/:caseId/emails", requireAuth(), async (req, res) => {
+router.get("/cases/:caseId/emails", requireApiAuth(), async (req, res) => {
   const userId = req.auth.userId!;
   const caseId = Number(req.params.caseId);
   if (!(await verifyCase(userId, caseId))) return res.status(404).json({ error: "Case not found" });

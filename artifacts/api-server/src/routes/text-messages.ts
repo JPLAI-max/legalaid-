@@ -8,7 +8,7 @@ import {
   casesTable,
 } from "@workspace/db";
 import { eq, and } from "drizzle-orm";
-import { requireAuth } from "@clerk/express";
+import { requireApiAuth } from "../middlewares/requireApiAuth";
 import { openai } from "@workspace/integrations-openai-ai-server";
 import { ObjectStorageService } from "../lib/objectStorage";
 
@@ -223,7 +223,7 @@ Rules:
 // Upload + parse
 router.post(
   "/cases/:caseId/text-messages/upload",
-  requireAuth(),
+  requireApiAuth(),
   upload.single("file"),
   async (req, res) => {
     const userId = req.auth.userId!;
@@ -347,7 +347,7 @@ router.post(
 );
 
 // List threads
-router.get("/cases/:caseId/text-messages/threads", requireAuth(), async (req, res) => {
+router.get("/cases/:caseId/text-messages/threads", requireApiAuth(), async (req, res) => {
   const userId = req.auth.userId!;
   const caseId = Number(req.params.caseId);
   if (!(await verifyCase(userId, caseId)))
@@ -363,7 +363,7 @@ router.get("/cases/:caseId/text-messages/threads", requireAuth(), async (req, re
 });
 
 // Get thread with messages
-router.get("/cases/:caseId/text-messages/threads/:threadId", requireAuth(), async (req, res) => {
+router.get("/cases/:caseId/text-messages/threads/:threadId", requireApiAuth(), async (req, res) => {
   const userId = req.auth.userId!;
   const caseId = Number(req.params.caseId);
   if (!(await verifyCase(userId, caseId)))
@@ -392,7 +392,7 @@ router.get("/cases/:caseId/text-messages/threads/:threadId", requireAuth(), asyn
 });
 
 // Delete thread
-router.delete("/cases/:caseId/text-messages/threads/:threadId", requireAuth(), async (req, res) => {
+router.delete("/cases/:caseId/text-messages/threads/:threadId", requireApiAuth(), async (req, res) => {
   const userId = req.auth.userId!;
   const caseId = Number(req.params.caseId);
   if (!(await verifyCase(userId, caseId)))
@@ -414,7 +414,7 @@ router.delete("/cases/:caseId/text-messages/threads/:threadId", requireAuth(), a
 // Suggest timeline events from a thread
 router.post(
   "/cases/:caseId/text-messages/threads/:threadId/suggest",
-  requireAuth(),
+  requireApiAuth(),
   async (req, res) => {
     const userId = req.auth.userId!;
     const caseId = Number(req.params.caseId);

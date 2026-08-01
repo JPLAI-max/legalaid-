@@ -8,7 +8,7 @@ import {
   casesTable,
 } from "@workspace/db";
 import { eq, and } from "drizzle-orm";
-import { requireAuth } from "@clerk/express";
+import { requireApiAuth } from "../middlewares/requireApiAuth";
 import { z } from "zod";
 import { openai } from "@workspace/integrations-openai-ai-server";
 
@@ -23,7 +23,7 @@ async function verifyCase(userId: string, caseId: number) {
 }
 
 // List transcripts
-router.get("/cases/:caseId/transcripts", requireAuth(), async (req, res) => {
+router.get("/cases/:caseId/transcripts", requireApiAuth(), async (req, res) => {
   const userId = req.auth.userId!;
   const caseId = Number(req.params.caseId);
   if (!(await verifyCase(userId, caseId))) return res.status(404).json({ error: "Case not found" });
@@ -37,7 +37,7 @@ router.get("/cases/:caseId/transcripts", requireAuth(), async (req, res) => {
 });
 
 // Create transcript
-router.post("/cases/:caseId/transcripts", requireAuth(), async (req, res) => {
+router.post("/cases/:caseId/transcripts", requireApiAuth(), async (req, res) => {
   const userId = req.auth.userId!;
   const caseId = Number(req.params.caseId);
   if (!(await verifyCase(userId, caseId))) return res.status(404).json({ error: "Case not found" });
@@ -55,7 +55,7 @@ router.post("/cases/:caseId/transcripts", requireAuth(), async (req, res) => {
 });
 
 // Update transcript
-router.patch("/cases/:caseId/transcripts/:transcriptId", requireAuth(), async (req, res) => {
+router.patch("/cases/:caseId/transcripts/:transcriptId", requireApiAuth(), async (req, res) => {
   const userId = req.auth.userId!;
   const caseId = Number(req.params.caseId);
   const transcriptId = Number(req.params.transcriptId);
@@ -72,7 +72,7 @@ router.patch("/cases/:caseId/transcripts/:transcriptId", requireAuth(), async (r
 });
 
 // Generate case summary
-router.post("/cases/:caseId/ai/generate-summary", requireAuth(), async (req, res) => {
+router.post("/cases/:caseId/ai/generate-summary", requireApiAuth(), async (req, res) => {
   const userId = req.auth.userId!;
   const caseId = Number(req.params.caseId);
   const found = await verifyCase(userId, caseId);
@@ -109,7 +109,7 @@ router.post("/cases/:caseId/ai/generate-summary", requireAuth(), async (req, res
 });
 
 // Suggest timeline events
-router.post("/cases/:caseId/ai/suggest-events", requireAuth(), async (req, res) => {
+router.post("/cases/:caseId/ai/suggest-events", requireApiAuth(), async (req, res) => {
   const userId = req.auth.userId!;
   const caseId = Number(req.params.caseId);
   if (!(await verifyCase(userId, caseId))) return res.status(404).json({ error: "Case not found" });
@@ -167,7 +167,7 @@ router.post("/cases/:caseId/ai/suggest-events", requireAuth(), async (req, res) 
 });
 
 // List suggested events
-router.get("/cases/:caseId/suggested-events", requireAuth(), async (req, res) => {
+router.get("/cases/:caseId/suggested-events", requireApiAuth(), async (req, res) => {
   const userId = req.auth.userId!;
   const caseId = Number(req.params.caseId);
   if (!(await verifyCase(userId, caseId))) return res.status(404).json({ error: "Case not found" });
@@ -181,7 +181,7 @@ router.get("/cases/:caseId/suggested-events", requireAuth(), async (req, res) =>
 });
 
 // Accept suggested event → promote to timeline
-router.post("/cases/:caseId/suggested-events/:suggestedEventId/accept", requireAuth(), async (req, res) => {
+router.post("/cases/:caseId/suggested-events/:suggestedEventId/accept", requireApiAuth(), async (req, res) => {
   const userId = req.auth.userId!;
   const caseId = Number(req.params.caseId);
   const suggestedId = Number(req.params.suggestedEventId);
@@ -214,7 +214,7 @@ router.post("/cases/:caseId/suggested-events/:suggestedEventId/accept", requireA
 });
 
 // Ignore suggested event
-router.post("/cases/:caseId/suggested-events/:suggestedEventId/ignore", requireAuth(), async (req, res) => {
+router.post("/cases/:caseId/suggested-events/:suggestedEventId/ignore", requireApiAuth(), async (req, res) => {
   const userId = req.auth.userId!;
   const caseId = Number(req.params.caseId);
   const suggestedId = Number(req.params.suggestedEventId);
@@ -229,7 +229,7 @@ router.post("/cases/:caseId/suggested-events/:suggestedEventId/ignore", requireA
 });
 
 // Get case summary
-router.get("/cases/:caseId/summary", requireAuth(), async (req, res) => {
+router.get("/cases/:caseId/summary", requireApiAuth(), async (req, res) => {
   const userId = req.auth.userId!;
   const caseId = Number(req.params.caseId);
   if (!(await verifyCase(userId, caseId))) return res.status(404).json({ error: "Case not found" });
@@ -243,7 +243,7 @@ router.get("/cases/:caseId/summary", requireAuth(), async (req, res) => {
 });
 
 // Save case summary
-router.put("/cases/:caseId/summary", requireAuth(), async (req, res) => {
+router.put("/cases/:caseId/summary", requireApiAuth(), async (req, res) => {
   const userId = req.auth.userId!;
   const caseId = Number(req.params.caseId);
   if (!(await verifyCase(userId, caseId))) return res.status(404).json({ error: "Case not found" });

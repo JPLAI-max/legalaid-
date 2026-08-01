@@ -8,7 +8,7 @@ import {
   exportsTable,
 } from "@workspace/db";
 import { eq, and, count } from "drizzle-orm";
-import { requireAuth } from "@clerk/express";
+import { requireApiAuth } from "../middlewares/requireApiAuth";
 import { z } from "zod";
 
 const router = Router();
@@ -24,7 +24,7 @@ const CreateCaseBodySchema = z.object({
 const UpdateCaseBodySchema = CreateCaseBodySchema.partial();
 
 // List cases
-router.get("/cases", requireAuth(), async (req, res) => {
+router.get("/cases", requireApiAuth(), async (req, res) => {
   const userId = req.auth.userId!;
   const cases = await db
     .select()
@@ -35,7 +35,7 @@ router.get("/cases", requireAuth(), async (req, res) => {
 });
 
 // Create case
-router.post("/cases", requireAuth(), async (req, res) => {
+router.post("/cases", requireApiAuth(), async (req, res) => {
   const userId = req.auth.userId!;
   const body = CreateCaseBodySchema.parse(req.body);
   const [newCase] = await db
@@ -46,7 +46,7 @@ router.post("/cases", requireAuth(), async (req, res) => {
 });
 
 // Get case
-router.get("/cases/:caseId", requireAuth(), async (req, res) => {
+router.get("/cases/:caseId", requireApiAuth(), async (req, res) => {
   const userId = req.auth.userId!;
   const caseId = Number(req.params.caseId);
   const [found] = await db
@@ -58,7 +58,7 @@ router.get("/cases/:caseId", requireAuth(), async (req, res) => {
 });
 
 // Update case
-router.patch("/cases/:caseId", requireAuth(), async (req, res) => {
+router.patch("/cases/:caseId", requireApiAuth(), async (req, res) => {
   const userId = req.auth.userId!;
   const caseId = Number(req.params.caseId);
   const body = UpdateCaseBodySchema.parse(req.body);
@@ -72,7 +72,7 @@ router.patch("/cases/:caseId", requireAuth(), async (req, res) => {
 });
 
 // Delete case
-router.delete("/cases/:caseId", requireAuth(), async (req, res) => {
+router.delete("/cases/:caseId", requireApiAuth(), async (req, res) => {
   const userId = req.auth.userId!;
   const caseId = Number(req.params.caseId);
   await db
@@ -82,7 +82,7 @@ router.delete("/cases/:caseId", requireAuth(), async (req, res) => {
 });
 
 // Case stats
-router.get("/cases/:caseId/stats", requireAuth(), async (req, res) => {
+router.get("/cases/:caseId/stats", requireApiAuth(), async (req, res) => {
   const userId = req.auth.userId!;
   const caseId = Number(req.params.caseId);
   const [foundCase] = await db

@@ -2,7 +2,7 @@ import { Router } from "express";
 import { db } from "@workspace/db";
 import { evidenceTable } from "@workspace/db";
 import { eq, and, ilike, gte, lte } from "drizzle-orm";
-import { requireAuth } from "@clerk/express";
+import { requireApiAuth } from "../middlewares/requireApiAuth";
 import { z } from "zod";
 import { casesTable } from "@workspace/db";
 
@@ -35,7 +35,7 @@ async function verifyCase(userId: string, caseId: number) {
 }
 
 // List evidence
-router.get("/cases/:caseId/evidence", requireAuth(), async (req, res) => {
+router.get("/cases/:caseId/evidence", requireApiAuth(), async (req, res) => {
   const userId = req.auth.userId!;
   const caseId = Number(req.params.caseId);
   if (!(await verifyCase(userId, caseId))) return res.status(404).json({ error: "Case not found" });
@@ -57,7 +57,7 @@ router.get("/cases/:caseId/evidence", requireAuth(), async (req, res) => {
 });
 
 // Create evidence
-router.post("/cases/:caseId/evidence", requireAuth(), async (req, res) => {
+router.post("/cases/:caseId/evidence", requireApiAuth(), async (req, res) => {
   const userId = req.auth.userId!;
   const caseId = Number(req.params.caseId);
   if (!(await verifyCase(userId, caseId))) return res.status(404).json({ error: "Case not found" });
@@ -71,7 +71,7 @@ router.post("/cases/:caseId/evidence", requireAuth(), async (req, res) => {
 });
 
 // Get evidence
-router.get("/cases/:caseId/evidence/:evidenceId", requireAuth(), async (req, res) => {
+router.get("/cases/:caseId/evidence/:evidenceId", requireApiAuth(), async (req, res) => {
   const userId = req.auth.userId!;
   const caseId = Number(req.params.caseId);
   const evidenceId = Number(req.params.evidenceId);
@@ -86,7 +86,7 @@ router.get("/cases/:caseId/evidence/:evidenceId", requireAuth(), async (req, res
 });
 
 // Update evidence
-router.patch("/cases/:caseId/evidence/:evidenceId", requireAuth(), async (req, res) => {
+router.patch("/cases/:caseId/evidence/:evidenceId", requireApiAuth(), async (req, res) => {
   const userId = req.auth.userId!;
   const caseId = Number(req.params.caseId);
   const evidenceId = Number(req.params.evidenceId);
@@ -103,7 +103,7 @@ router.patch("/cases/:caseId/evidence/:evidenceId", requireAuth(), async (req, r
 });
 
 // Delete evidence
-router.delete("/cases/:caseId/evidence/:evidenceId", requireAuth(), async (req, res) => {
+router.delete("/cases/:caseId/evidence/:evidenceId", requireApiAuth(), async (req, res) => {
   const userId = req.auth.userId!;
   const caseId = Number(req.params.caseId);
   const evidenceId = Number(req.params.evidenceId);

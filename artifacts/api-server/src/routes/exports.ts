@@ -2,7 +2,7 @@ import { Router } from "express";
 import { db } from "@workspace/db";
 import { exportsTable, casesTable } from "@workspace/db";
 import { eq, and } from "drizzle-orm";
-import { requireAuth } from "@clerk/express";
+import { requireApiAuth } from "../middlewares/requireApiAuth";
 import { z } from "zod";
 
 const router = Router();
@@ -16,7 +16,7 @@ async function verifyCase(userId: string, caseId: number) {
 }
 
 // List exports
-router.get("/cases/:caseId/exports", requireAuth(), async (req, res) => {
+router.get("/cases/:caseId/exports", requireApiAuth(), async (req, res) => {
   const userId = req.auth.userId!;
   const caseId = Number(req.params.caseId);
   if (!(await verifyCase(userId, caseId))) return res.status(404).json({ error: "Case not found" });
@@ -30,7 +30,7 @@ router.get("/cases/:caseId/exports", requireAuth(), async (req, res) => {
 });
 
 // Create export
-router.post("/cases/:caseId/exports", requireAuth(), async (req, res) => {
+router.post("/cases/:caseId/exports", requireApiAuth(), async (req, res) => {
   const userId = req.auth.userId!;
   const caseId = Number(req.params.caseId);
   if (!(await verifyCase(userId, caseId))) return res.status(404).json({ error: "Case not found" });
