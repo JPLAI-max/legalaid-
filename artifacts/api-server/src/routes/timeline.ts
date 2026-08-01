@@ -43,7 +43,7 @@ router.get("/cases/:caseId/events", requireAuth(), async (req, res) => {
     .from(timelineEventsTable)
     .where(eq(timelineEventsTable.caseId, caseId))
     .orderBy(timelineEventsTable.eventDate);
-  res.json(events);
+  return res.json(events);
 });
 
 // Create timeline event
@@ -57,7 +57,7 @@ router.post("/cases/:caseId/events", requireAuth(), async (req, res) => {
     .insert(timelineEventsTable)
     .values({ ...body, caseId, people: body.people ?? [], tags: body.tags ?? [] })
     .returning();
-  res.status(201).json(created);
+  return res.status(201).json(created);
 });
 
 // Get timeline event
@@ -72,7 +72,7 @@ router.get("/cases/:caseId/events/:eventId", requireAuth(), async (req, res) => 
     .from(timelineEventsTable)
     .where(and(eq(timelineEventsTable.id, eventId), eq(timelineEventsTable.caseId, caseId)));
   if (!found) return res.status(404).json({ error: "Not found" });
-  res.json(found);
+  return res.json(found);
 });
 
 // Update timeline event
@@ -89,7 +89,7 @@ router.patch("/cases/:caseId/events/:eventId", requireAuth(), async (req, res) =
     .where(and(eq(timelineEventsTable.id, eventId), eq(timelineEventsTable.caseId, caseId)))
     .returning();
   if (!updated) return res.status(404).json({ error: "Not found" });
-  res.json(updated);
+  return res.json(updated);
 });
 
 // Delete timeline event
@@ -102,7 +102,7 @@ router.delete("/cases/:caseId/events/:eventId", requireAuth(), async (req, res) 
   await db
     .delete(timelineEventsTable)
     .where(and(eq(timelineEventsTable.id, eventId), eq(timelineEventsTable.caseId, caseId)));
-  res.status(204).send();
+  return res.status(204).send();
 });
 
 // List event evidence
@@ -117,7 +117,7 @@ router.get("/cases/:caseId/events/:eventId/evidence", requireAuth(), async (req,
     .from(eventEvidenceTable)
     .innerJoin(evidenceTable, eq(eventEvidenceTable.evidenceId, evidenceTable.id))
     .where(eq(eventEvidenceTable.eventId, eventId));
-  res.json(attached.map(a => a.evidence));
+  return res.json(attached.map(a => a.evidence));
 });
 
 // Attach evidence to event
@@ -132,7 +132,7 @@ router.post("/cases/:caseId/events/:eventId/evidence", requireAuth(), async (req
     .insert(eventEvidenceTable)
     .values({ eventId, evidenceId })
     .onConflictDoNothing();
-  res.status(201).json({ success: true });
+  return res.status(201).json({ success: true });
 });
 
 // Detach evidence from event
@@ -146,7 +146,7 @@ router.delete("/cases/:caseId/events/:eventId/evidence/:evidenceId", requireAuth
   await db
     .delete(eventEvidenceTable)
     .where(and(eq(eventEvidenceTable.eventId, eventId), eq(eventEvidenceTable.evidenceId, evidenceId)));
-  res.status(204).send();
+  return res.status(204).send();
 });
 
 export default router;

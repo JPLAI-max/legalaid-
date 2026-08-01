@@ -24,7 +24,7 @@ export function Header() {
             </Link>
           </Show>
           <Show when="signed-in">
-            <UserButton afterSignOutUrl={basePath || "/"} />
+            <UserButton />
           </Show>
         </div>
       </div>

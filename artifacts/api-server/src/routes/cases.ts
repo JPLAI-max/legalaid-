@@ -31,7 +31,7 @@ router.get("/cases", requireAuth(), async (req, res) => {
     .from(casesTable)
     .where(eq(casesTable.userId, userId))
     .orderBy(casesTable.updatedAt);
-  res.json(cases);
+  return res.json(cases);
 });
 
 // Create case
@@ -42,7 +42,7 @@ router.post("/cases", requireAuth(), async (req, res) => {
     .insert(casesTable)
     .values({ ...body, userId })
     .returning();
-  res.status(201).json(newCase);
+  return res.status(201).json(newCase);
 });
 
 // Get case
@@ -54,7 +54,7 @@ router.get("/cases/:caseId", requireAuth(), async (req, res) => {
     .from(casesTable)
     .where(and(eq(casesTable.id, caseId), eq(casesTable.userId, userId)));
   if (!found) return res.status(404).json({ error: "Not found" });
-  res.json(found);
+  return res.json(found);
 });
 
 // Update case
@@ -68,7 +68,7 @@ router.patch("/cases/:caseId", requireAuth(), async (req, res) => {
     .where(and(eq(casesTable.id, caseId), eq(casesTable.userId, userId)))
     .returning();
   if (!updated) return res.status(404).json({ error: "Not found" });
-  res.json(updated);
+  return res.json(updated);
 });
 
 // Delete case
@@ -78,7 +78,7 @@ router.delete("/cases/:caseId", requireAuth(), async (req, res) => {
   await db
     .delete(casesTable)
     .where(and(eq(casesTable.id, caseId), eq(casesTable.userId, userId)));
-  res.status(204).send();
+  return res.status(204).send();
 });
 
 // Case stats
@@ -111,7 +111,7 @@ router.get("/cases/:caseId/stats", requireAuth(), async (req, res) => {
     .limit(1);
   const lastExport = exportsList[0];
 
-  res.json({
+  return res.json({
     caseId,
     evidenceCount: Number(evidenceCount?.count ?? 0),
     timelineEventCount: Number(eventCount?.count ?? 0),

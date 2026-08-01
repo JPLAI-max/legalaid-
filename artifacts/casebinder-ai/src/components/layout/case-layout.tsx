@@ -12,7 +12,7 @@ import {
   MessageSquare,
   ChevronLeft
 } from "lucide-react";
-import { useGetCase } from "@workspace/api-client-react";
+import { useGetCase, getGetCaseQueryKey } from "@workspace/api-client-react";
 import { Header } from "@/components/layout/header";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -27,7 +27,7 @@ export function CaseLayout({ children, params }: CaseLayoutProps) {
   const [location] = useLocation();
   const caseId = parseInt(params.caseId);
   const { data: caseData, isLoading } = useGetCase(caseId, {
-    query: { enabled: !!caseId }
+    query: { enabled: !!caseId, queryKey: getGetCaseQueryKey(caseId) }
   });
 
   const navItems = [

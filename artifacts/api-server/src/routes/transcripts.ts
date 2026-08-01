@@ -33,7 +33,7 @@ router.get("/cases/:caseId/transcripts", requireAuth(), async (req, res) => {
     .from(transcriptsTable)
     .where(eq(transcriptsTable.caseId, caseId))
     .orderBy(transcriptsTable.createdAt);
-  res.json(transcripts);
+  return res.json(transcripts);
 });
 
 // Create transcript
@@ -51,7 +51,7 @@ router.post("/cases/:caseId/transcripts", requireAuth(), async (req, res) => {
     .insert(transcriptsTable)
     .values({ ...body, caseId })
     .returning();
-  res.status(201).json(created);
+  return res.status(201).json(created);
 });
 
 // Update transcript
@@ -68,7 +68,7 @@ router.patch("/cases/:caseId/transcripts/:transcriptId", requireAuth(), async (r
     .where(and(eq(transcriptsTable.id, transcriptId), eq(transcriptsTable.caseId, caseId)))
     .returning();
   if (!updated) return res.status(404).json({ error: "Not found" });
-  res.json(updated);
+  return res.json(updated);
 });
 
 // Generate case summary
@@ -105,7 +105,7 @@ router.post("/cases/:caseId/ai/generate-summary", requireAuth(), async (req, res
   });
 
   const summary = completion.choices[0]?.message?.content ?? "";
-  res.json({ summary, suggestedTitle: null });
+  return res.json({ summary, suggestedTitle: null });
 });
 
 // Suggest timeline events
@@ -163,7 +163,7 @@ router.post("/cases/:caseId/ai/suggest-events", requireAuth(), async (req, res) 
     saved.push(inserted);
   }
 
-  res.json(saved);
+  return res.json(saved);
 });
 
 // List suggested events
@@ -177,7 +177,7 @@ router.get("/cases/:caseId/suggested-events", requireAuth(), async (req, res) =>
     .from(suggestedEventsTable)
     .where(eq(suggestedEventsTable.caseId, caseId))
     .orderBy(suggestedEventsTable.createdAt);
-  res.json(events);
+  return res.json(events);
 });
 
 // Accept suggested event → promote to timeline
@@ -210,7 +210,7 @@ router.post("/cases/:caseId/suggested-events/:suggestedEventId/accept", requireA
     .set({ status: "accepted" })
     .where(eq(suggestedEventsTable.id, suggestedId));
 
-  res.status(201).json(created);
+  return res.status(201).json(created);
 });
 
 // Ignore suggested event
@@ -225,7 +225,7 @@ router.post("/cases/:caseId/suggested-events/:suggestedEventId/ignore", requireA
     .set({ status: "ignored" })
     .where(and(eq(suggestedEventsTable.id, suggestedId), eq(suggestedEventsTable.caseId, caseId)));
 
-  res.json({ success: true });
+  return res.json({ success: true });
 });
 
 // Get case summary
@@ -239,7 +239,7 @@ router.get("/cases/:caseId/summary", requireAuth(), async (req, res) => {
     .from(caseSummariesTable)
     .where(eq(caseSummariesTable.caseId, caseId));
   if (!summary) return res.status(404).json({ error: "No summary yet" });
-  res.json(summary);
+  return res.json(summary);
 });
 
 // Save case summary
@@ -268,7 +268,7 @@ router.put("/cases/:caseId/summary", requireAuth(), async (req, res) => {
       .values({ caseId, content })
       .returning();
   }
-  res.json(summary);
+  return res.json(summary);
 });
 
 export default router;

@@ -107,7 +107,7 @@ export function EvidenceUpload({ params }: { params: { caseId: string } }) {
                         data: {
                           filename: file.name,
                           fileType: file.type || "application/octet-stream",
-                          objectPath: file.response.body.objectPath,
+                          objectPath: (file.response?.body as { objectPath: string })?.objectPath ?? "",
                           fileSize: file.size,
                         }
                       });

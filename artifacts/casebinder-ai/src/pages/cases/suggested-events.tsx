@@ -47,11 +47,11 @@ export function SuggestedEventsPage({ params }: { params: { caseId: string } }) 
   });
 
   const handleAccept = (eventId: number) => {
-    acceptEvent.mutate({ caseId, eventId });
+    acceptEvent.mutate({ caseId, suggestedEventId: eventId });
   };
 
   const handleIgnore = (eventId: number) => {
-    ignoreEvent.mutate({ caseId, eventId });
+    ignoreEvent.mutate({ caseId, suggestedEventId: eventId });
   };
 
   const pendingEvents = suggestedEvents?.filter(e => e.status === SuggestedEventStatus.pending) || [];

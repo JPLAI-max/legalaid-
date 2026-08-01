@@ -26,7 +26,7 @@ router.get("/cases/:caseId/exports", requireAuth(), async (req, res) => {
     .from(exportsTable)
     .where(eq(exportsTable.caseId, caseId))
     .orderBy(exportsTable.createdAt);
-  res.json(exports);
+  return res.json(exports);
 });
 
 // Create export
@@ -51,7 +51,7 @@ router.post("/cases/:caseId/exports", requireAuth(), async (req, res) => {
     .where(eq(exportsTable.id, created.id))
     .returning();
 
-  res.status(201).json(updated);
+  return res.status(201).json(updated);
 });
 
 export default router;

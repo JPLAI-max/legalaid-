@@ -53,7 +53,7 @@ router.get("/cases/:caseId/evidence", requireAuth(), async (req, res) => {
   if (fileType) {
     results = results.filter(e => e.fileType === fileType);
   }
-  res.json(results);
+  return res.json(results);
 });
 
 // Create evidence
@@ -67,7 +67,7 @@ router.post("/cases/:caseId/evidence", requireAuth(), async (req, res) => {
     .insert(evidenceTable)
     .values({ ...body, caseId, tags: body.tags ?? [], people: body.people ?? [] })
     .returning();
-  res.status(201).json(created);
+  return res.status(201).json(created);
 });
 
 // Get evidence
@@ -82,7 +82,7 @@ router.get("/cases/:caseId/evidence/:evidenceId", requireAuth(), async (req, res
     .from(evidenceTable)
     .where(and(eq(evidenceTable.id, evidenceId), eq(evidenceTable.caseId, caseId)));
   if (!found) return res.status(404).json({ error: "Not found" });
-  res.json(found);
+  return res.json(found);
 });
 
 // Update evidence
@@ -99,7 +99,7 @@ router.patch("/cases/:caseId/evidence/:evidenceId", requireAuth(), async (req, r
     .where(and(eq(evidenceTable.id, evidenceId), eq(evidenceTable.caseId, caseId)))
     .returning();
   if (!updated) return res.status(404).json({ error: "Not found" });
-  res.json(updated);
+  return res.json(updated);
 });
 
 // Delete evidence
@@ -112,7 +112,7 @@ router.delete("/cases/:caseId/evidence/:evidenceId", requireAuth(), async (req, 
   await db
     .delete(evidenceTable)
     .where(and(eq(evidenceTable.id, evidenceId), eq(evidenceTable.caseId, caseId)));
-  res.status(204).send();
+  return res.status(204).send();
 });
 
 export default router;
