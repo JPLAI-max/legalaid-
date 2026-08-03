@@ -6,6 +6,7 @@ import {
 } from "@workspace/api-zod";
 import { ObjectStorageService, ObjectNotFoundError } from "../lib/objectStorage";
 import { requireApiAuth } from "../middlewares/requireApiAuth";
+import { getAuth } from "@clerk/express";
 import { db } from "@workspace/db";
 import { evidenceTable, exportsTable, casesTable } from "@workspace/db";
 import { eq, and } from "drizzle-orm";
@@ -101,7 +102,7 @@ router.get(
     const raw = req.params.path;
     const wildcardPath = Array.isArray(raw) ? raw.join("/") : raw;
     const objectPath = `/objects/${wildcardPath}`;
-    const userId = req.auth.userId!;
+    const userId = getAuth(req).userId!;
 
     try {
       // Run both ownership queries in parallel.

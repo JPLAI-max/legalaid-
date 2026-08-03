@@ -9,6 +9,7 @@ import {
 } from "@workspace/db";
 import { eq, and, count } from "drizzle-orm";
 import { requireApiAuth } from "../middlewares/requireApiAuth";
+import { getAuth } from "@clerk/express";
 import { z } from "zod";
 
 const router = Router();
@@ -25,7 +26,7 @@ const UpdateCaseBodySchema = CreateCaseBodySchema.partial();
 
 // List cases
 router.get("/cases", requireApiAuth(), async (req, res) => {
-  const userId = req.auth.userId!;
+  const userId = getAuth(req).userId!;
   const cases = await db
     .select()
     .from(casesTable)
@@ -36,7 +37,7 @@ router.get("/cases", requireApiAuth(), async (req, res) => {
 
 // Create case
 router.post("/cases", requireApiAuth(), async (req, res) => {
-  const userId = req.auth.userId!;
+  const userId = getAuth(req).userId!;
   const body = CreateCaseBodySchema.parse(req.body);
   const [newCase] = await db
     .insert(casesTable)
@@ -47,7 +48,7 @@ router.post("/cases", requireApiAuth(), async (req, res) => {
 
 // Get case
 router.get("/cases/:caseId", requireApiAuth(), async (req, res) => {
-  const userId = req.auth.userId!;
+  const userId = getAuth(req).userId!;
   const caseId = Number(req.params.caseId);
   const [found] = await db
     .select()
@@ -59,7 +60,7 @@ router.get("/cases/:caseId", requireApiAuth(), async (req, res) => {
 
 // Update case
 router.patch("/cases/:caseId", requireApiAuth(), async (req, res) => {
-  const userId = req.auth.userId!;
+  const userId = getAuth(req).userId!;
   const caseId = Number(req.params.caseId);
   const body = UpdateCaseBodySchema.parse(req.body);
   const [updated] = await db
@@ -73,7 +74,7 @@ router.patch("/cases/:caseId", requireApiAuth(), async (req, res) => {
 
 // Delete case
 router.delete("/cases/:caseId", requireApiAuth(), async (req, res) => {
-  const userId = req.auth.userId!;
+  const userId = getAuth(req).userId!;
   const caseId = Number(req.params.caseId);
   await db
     .delete(casesTable)
@@ -83,7 +84,7 @@ router.delete("/cases/:caseId", requireApiAuth(), async (req, res) => {
 
 // Case stats
 router.get("/cases/:caseId/stats", requireApiAuth(), async (req, res) => {
-  const userId = req.auth.userId!;
+  const userId = getAuth(req).userId!;
   const caseId = Number(req.params.caseId);
   const [foundCase] = await db
     .select({ id: casesTable.id })

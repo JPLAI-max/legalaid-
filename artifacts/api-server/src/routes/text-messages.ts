@@ -9,6 +9,7 @@ import {
 } from "@workspace/db";
 import { eq, and } from "drizzle-orm";
 import { requireApiAuth } from "../middlewares/requireApiAuth";
+import { getAuth } from "@clerk/express";
 import { openai } from "@workspace/integrations-openai-ai-server";
 import { ObjectStorageService } from "../lib/objectStorage";
 
@@ -226,7 +227,7 @@ router.post(
   requireApiAuth(),
   upload.single("file"),
   async (req, res) => {
-    const userId = req.auth.userId!;
+    const userId = getAuth(req).userId!;
     const caseId = Number(req.params.caseId);
     if (!(await verifyCase(userId, caseId)))
       return res.status(404).json({ error: "Case not found" });
@@ -348,7 +349,7 @@ router.post(
 
 // List threads
 router.get("/cases/:caseId/text-messages/threads", requireApiAuth(), async (req, res) => {
-  const userId = req.auth.userId!;
+  const userId = getAuth(req).userId!;
   const caseId = Number(req.params.caseId);
   if (!(await verifyCase(userId, caseId)))
     return res.status(404).json({ error: "Case not found" });
@@ -364,7 +365,7 @@ router.get("/cases/:caseId/text-messages/threads", requireApiAuth(), async (req,
 
 // Get thread with messages
 router.get("/cases/:caseId/text-messages/threads/:threadId", requireApiAuth(), async (req, res) => {
-  const userId = req.auth.userId!;
+  const userId = getAuth(req).userId!;
   const caseId = Number(req.params.caseId);
   if (!(await verifyCase(userId, caseId)))
     return res.status(404).json({ error: "Case not found" });
@@ -393,7 +394,7 @@ router.get("/cases/:caseId/text-messages/threads/:threadId", requireApiAuth(), a
 
 // Delete thread
 router.delete("/cases/:caseId/text-messages/threads/:threadId", requireApiAuth(), async (req, res) => {
-  const userId = req.auth.userId!;
+  const userId = getAuth(req).userId!;
   const caseId = Number(req.params.caseId);
   if (!(await verifyCase(userId, caseId)))
     return res.status(404).json({ error: "Case not found" });
@@ -416,7 +417,7 @@ router.post(
   "/cases/:caseId/text-messages/threads/:threadId/suggest",
   requireApiAuth(),
   async (req, res) => {
-    const userId = req.auth.userId!;
+    const userId = getAuth(req).userId!;
     const caseId = Number(req.params.caseId);
     if (!(await verifyCase(userId, caseId)))
       return res.status(404).json({ error: "Case not found" });

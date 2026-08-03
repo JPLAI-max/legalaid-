@@ -8,6 +8,7 @@ import {
 } from "@workspace/db";
 import { eq, and } from "drizzle-orm";
 import { requireApiAuth } from "../middlewares/requireApiAuth";
+import { getAuth } from "@clerk/express";
 import { z } from "zod";
 
 const router = Router();
@@ -34,7 +35,7 @@ async function verifyCase(userId: string, caseId: number) {
 
 // List timeline events
 router.get("/cases/:caseId/events", requireApiAuth(), async (req, res) => {
-  const userId = req.auth.userId!;
+  const userId = getAuth(req).userId!;
   const caseId = Number(req.params.caseId);
   if (!(await verifyCase(userId, caseId))) return res.status(404).json({ error: "Case not found" });
 
@@ -48,7 +49,7 @@ router.get("/cases/:caseId/events", requireApiAuth(), async (req, res) => {
 
 // Create timeline event
 router.post("/cases/:caseId/events", requireApiAuth(), async (req, res) => {
-  const userId = req.auth.userId!;
+  const userId = getAuth(req).userId!;
   const caseId = Number(req.params.caseId);
   if (!(await verifyCase(userId, caseId))) return res.status(404).json({ error: "Case not found" });
 
@@ -62,7 +63,7 @@ router.post("/cases/:caseId/events", requireApiAuth(), async (req, res) => {
 
 // Get timeline event
 router.get("/cases/:caseId/events/:eventId", requireApiAuth(), async (req, res) => {
-  const userId = req.auth.userId!;
+  const userId = getAuth(req).userId!;
   const caseId = Number(req.params.caseId);
   const eventId = Number(req.params.eventId);
   if (!(await verifyCase(userId, caseId))) return res.status(404).json({ error: "Case not found" });
@@ -77,7 +78,7 @@ router.get("/cases/:caseId/events/:eventId", requireApiAuth(), async (req, res) 
 
 // Update timeline event
 router.patch("/cases/:caseId/events/:eventId", requireApiAuth(), async (req, res) => {
-  const userId = req.auth.userId!;
+  const userId = getAuth(req).userId!;
   const caseId = Number(req.params.caseId);
   const eventId = Number(req.params.eventId);
   if (!(await verifyCase(userId, caseId))) return res.status(404).json({ error: "Case not found" });
@@ -94,7 +95,7 @@ router.patch("/cases/:caseId/events/:eventId", requireApiAuth(), async (req, res
 
 // Delete timeline event
 router.delete("/cases/:caseId/events/:eventId", requireApiAuth(), async (req, res) => {
-  const userId = req.auth.userId!;
+  const userId = getAuth(req).userId!;
   const caseId = Number(req.params.caseId);
   const eventId = Number(req.params.eventId);
   if (!(await verifyCase(userId, caseId))) return res.status(404).json({ error: "Case not found" });
@@ -107,7 +108,7 @@ router.delete("/cases/:caseId/events/:eventId", requireApiAuth(), async (req, re
 
 // List event evidence
 router.get("/cases/:caseId/events/:eventId/evidence", requireApiAuth(), async (req, res) => {
-  const userId = req.auth.userId!;
+  const userId = getAuth(req).userId!;
   const caseId = Number(req.params.caseId);
   const eventId = Number(req.params.eventId);
   if (!(await verifyCase(userId, caseId))) return res.status(404).json({ error: "Case not found" });
@@ -122,7 +123,7 @@ router.get("/cases/:caseId/events/:eventId/evidence", requireApiAuth(), async (r
 
 // Attach evidence to event
 router.post("/cases/:caseId/events/:eventId/evidence", requireApiAuth(), async (req, res) => {
-  const userId = req.auth.userId!;
+  const userId = getAuth(req).userId!;
   const caseId = Number(req.params.caseId);
   const eventId = Number(req.params.eventId);
   if (!(await verifyCase(userId, caseId))) return res.status(404).json({ error: "Case not found" });
@@ -137,7 +138,7 @@ router.post("/cases/:caseId/events/:eventId/evidence", requireApiAuth(), async (
 
 // Detach evidence from event
 router.delete("/cases/:caseId/events/:eventId/evidence/:evidenceId", requireApiAuth(), async (req, res) => {
-  const userId = req.auth.userId!;
+  const userId = getAuth(req).userId!;
   const caseId = Number(req.params.caseId);
   const eventId = Number(req.params.eventId);
   const evidenceId = Number(req.params.evidenceId);

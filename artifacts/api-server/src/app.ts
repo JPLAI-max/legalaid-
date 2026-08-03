@@ -1,4 +1,4 @@
-import express, { type Express } from "express";
+import express, { type Express, type NextFunction, type Request, type Response } from "express";
 import cors from "cors";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -80,5 +80,21 @@ if (process.env.NODE_ENV === "production") {
     res.sendFile(path.join(frontendDist, "index.html"));
   });
 }
+
+// ── Global JSON error handler ─────────────────────────────────────────────────
+// Must be the last middleware. Express identifies error handlers by the
+// four-argument signature (err, req, res, next).
+// In Express 5, async route errors are forwarded here automatically.
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
+  logger.error({ err }, "Unhandled route error");
+  const status =
+    (err as unknown as Record<string, unknown>)["status"] ??
+    (err as unknown as Record<string, unknown>)["statusCode"] ??
+    500;
+  if (!res.headersSent) {
+    res.status(Number(status)).json({ error: err.message || "Internal server error" });
+  }
+});
 
 export default app;

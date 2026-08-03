@@ -68,10 +68,14 @@ export function NewCase() {
         });
         setLocation(`/cases/${data.id}/overview`);
       },
-      onError: () => {
+      onError: (error: unknown) => {
+        const message =
+          (error as any)?.response?.data?.error ||
+          (error as any)?.message ||
+          "Please try again.";
         toast({
-          title: "Error",
-          description: "Failed to create case. Please try again.",
+          title: "Failed to create case",
+          description: message,
           variant: "destructive",
         });
       }

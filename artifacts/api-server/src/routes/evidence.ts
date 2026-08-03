@@ -3,6 +3,7 @@ import { db } from "@workspace/db";
 import { evidenceTable } from "@workspace/db";
 import { eq, and, ilike, gte, lte } from "drizzle-orm";
 import { requireApiAuth } from "../middlewares/requireApiAuth";
+import { getAuth } from "@clerk/express";
 import { z } from "zod";
 import { casesTable } from "@workspace/db";
 
@@ -36,7 +37,7 @@ async function verifyCase(userId: string, caseId: number) {
 
 // List evidence
 router.get("/cases/:caseId/evidence", requireApiAuth(), async (req, res) => {
-  const userId = req.auth.userId!;
+  const userId = getAuth(req).userId!;
   const caseId = Number(req.params.caseId);
   if (!(await verifyCase(userId, caseId))) return res.status(404).json({ error: "Case not found" });
 
@@ -58,7 +59,7 @@ router.get("/cases/:caseId/evidence", requireApiAuth(), async (req, res) => {
 
 // Create evidence
 router.post("/cases/:caseId/evidence", requireApiAuth(), async (req, res) => {
-  const userId = req.auth.userId!;
+  const userId = getAuth(req).userId!;
   const caseId = Number(req.params.caseId);
   if (!(await verifyCase(userId, caseId))) return res.status(404).json({ error: "Case not found" });
 
@@ -72,7 +73,7 @@ router.post("/cases/:caseId/evidence", requireApiAuth(), async (req, res) => {
 
 // Get evidence
 router.get("/cases/:caseId/evidence/:evidenceId", requireApiAuth(), async (req, res) => {
-  const userId = req.auth.userId!;
+  const userId = getAuth(req).userId!;
   const caseId = Number(req.params.caseId);
   const evidenceId = Number(req.params.evidenceId);
   if (!(await verifyCase(userId, caseId))) return res.status(404).json({ error: "Case not found" });
@@ -87,7 +88,7 @@ router.get("/cases/:caseId/evidence/:evidenceId", requireApiAuth(), async (req, 
 
 // Update evidence
 router.patch("/cases/:caseId/evidence/:evidenceId", requireApiAuth(), async (req, res) => {
-  const userId = req.auth.userId!;
+  const userId = getAuth(req).userId!;
   const caseId = Number(req.params.caseId);
   const evidenceId = Number(req.params.evidenceId);
   if (!(await verifyCase(userId, caseId))) return res.status(404).json({ error: "Case not found" });
@@ -104,7 +105,7 @@ router.patch("/cases/:caseId/evidence/:evidenceId", requireApiAuth(), async (req
 
 // Delete evidence
 router.delete("/cases/:caseId/evidence/:evidenceId", requireApiAuth(), async (req, res) => {
-  const userId = req.auth.userId!;
+  const userId = getAuth(req).userId!;
   const caseId = Number(req.params.caseId);
   const evidenceId = Number(req.params.evidenceId);
   if (!(await verifyCase(userId, caseId))) return res.status(404).json({ error: "Case not found" });
