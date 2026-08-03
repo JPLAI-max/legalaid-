@@ -297,7 +297,7 @@ export function EmailImportPage({ params }: { params: { caseId: string } }) {
         <Shield className="h-4 w-4 text-teal-600 dark:text-teal-400" />
         <AlertTitle className="text-teal-800 dark:text-teal-300">Privacy First</AlertTitle>
         <AlertDescription className="text-teal-700 dark:text-teal-400 text-sm">
-          Legal Aid only imports emails you choose to add to a case. Your inbox is never scanned automatically.
+          Exhibit A only imports emails you choose to add to a case. Your inbox is never scanned automatically.
         </AlertDescription>
       </Alert>
 

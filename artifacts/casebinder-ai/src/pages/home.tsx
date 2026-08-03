@@ -8,14 +8,14 @@ export function Home() {
       {/* Hero Section */}
       <section className="w-full py-12 md:py-24 lg:py-32 xl:py-48 flex flex-col items-center justify-center text-center">
         <div className="space-y-6 max-w-3xl">
-          <div className="text-4xl font-extrabold tracking-tight sm:text-5xl md:text-6xl text-foreground">
-            Legal <span className="text-[#1FA5A3]">Aid</span>
+          <div className="text-5xl font-extrabold tracking-tight sm:text-6xl md:text-7xl text-foreground">
+            Exhibit <span className="text-[#1FA5A3]">A</span>
           </div>
-          <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl text-foreground">
-            Turn case evidence into a searchable legal timeline.
+          <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl md:text-4xl text-foreground">
+            Turn your messages into evidence.<br className="hidden sm:block" /> Build the timeline of your case.
           </h1>
           <p className="mx-auto max-w-[700px] text-lg md:text-xl text-muted-foreground">
-            A calm, professional workspace for organizing the chaos of a legal case. Build your timeline, manage evidence, and prepare for court with confidence.
+            A calm, professional workspace for organizing the chaos of a legal case. Manage evidence, build your timeline, and prepare for court with confidence.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
             <Link href="/sign-up">

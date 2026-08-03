@@ -1,56 +1,14 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" fill="none">
   <defs>
-    <linearGradient id="circleGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#0B1F3B"/>
       <stop offset="100%" stop-color="#1FA5A3"/>
     </linearGradient>
-    <linearGradient id="iconGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#0B1F3B"/>
-      <stop offset="100%" stop-color="#1FA5A3"/>
-    </linearGradient>
-    <clipPath id="circle">
-      <circle cx="60" cy="60" r="52"/>
-    </clipPath>
   </defs>
-
-  <!-- Outer ring: navy-to-teal gradient stroke -->
-  <circle cx="60" cy="60" r="52" stroke="url(#circleGrad)" stroke-width="4" fill="none"/>
-
-  <!-- Hand (simplified, abstract — open palm cradling the scales) -->
-  <path d="M22 78 Q24 90 36 92 Q50 94 60 90 Q70 94 84 92 Q96 90 98 78 L94 70 Q88 74 80 73 L72 72 L72 68 Q72 65 69 65 Q66 65 66 68 L66 72 L60 72 L60 68 Q60 65 57 65 Q54 65 54 68 L54 72 L48 72 L48 68 Q48 65 45 65 Q42 65 42 68 L42 72 L26 70 Z" fill="url(#iconGrad)" opacity="0.85"/>
-
-  <!-- Scale post -->
-  <line x1="60" y1="30" x2="60" y2="65" stroke="url(#iconGrad)" stroke-width="3" stroke-linecap="round"/>
-
-  <!-- Scale beam -->
-  <line x1="36" y1="38" x2="84" y2="38" stroke="url(#iconGrad)" stroke-width="2.5" stroke-linecap="round"/>
-  <!-- Beam top knob -->
-  <circle cx="60" cy="30" r="3" fill="url(#iconGrad)"/>
-
-  <!-- Left scale pan strings -->
-  <line x1="36" y1="38" x2="30" y2="52" stroke="url(#iconGrad)" stroke-width="1.5" stroke-linecap="round"/>
-  <line x1="36" y1="38" x2="42" y2="52" stroke="url(#iconGrad)" stroke-width="1.5" stroke-linecap="round"/>
-  <!-- Left pan -->
-  <path d="M28 53 Q36 58 44 53" stroke="url(#iconGrad)" stroke-width="2" stroke-linecap="round" fill="none"/>
-
-  <!-- Right scale pan strings -->
-  <line x1="84" y1="38" x2="78" y2="52" stroke="url(#iconGrad)" stroke-width="1.5" stroke-linecap="round"/>
-  <line x1="84" y1="38" x2="90" y2="52" stroke="url(#iconGrad)" stroke-width="1.5" stroke-linecap="round"/>
-  <!-- Right pan -->
-  <path d="M76 53 Q84 58 92 53" stroke="url(#iconGrad)" stroke-width="2" stroke-linecap="round" fill="none"/>
-
-  <!-- Checklist lines (right side, in front of scale) -->
-  <!-- Check 1 -->
-  <circle cx="74" cy="42" r="3.5" fill="#1FA5A3" opacity="0.9"/>
-  <path d="M72.5 42 L74 43.5 L76 41" stroke="white" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-  <line x1="79" y1="42" x2="88" y2="42" stroke="#1FA5A3" stroke-width="2" stroke-linecap="round" opacity="0.8"/>
-
-  <!-- Check 2 -->
-  <circle cx="74" cy="49" r="3.5" fill="#1FA5A3" opacity="0.7"/>
-  <path d="M72.5 49 L74 50.5 L76 48" stroke="white" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-  <line x1="79" y1="49" x2="88" y2="49" stroke="#1FA5A3" stroke-width="2" stroke-linecap="round" opacity="0.6"/>
-
-  <!-- Bullet 3 (dot only, pending) -->
-  <circle cx="74" cy="56" r="2.5" fill="#0B1F3B" opacity="0.5"/>
-  <line x1="79" y1="56" x2="88" y2="56" stroke="#0B1F3B" stroke-width="2" stroke-linecap="round" opacity="0.4"/>
+  <!-- Rounded-square background -->
+  <rect x="8" y="8" width="104" height="104" rx="22" fill="url(#bg)"/>
+  <!-- "A" letterform — two legs + crossbar -->
+  <line x1="60" y1="20" x2="26" y2="94" stroke="white" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/>
+  <line x1="60" y1="20" x2="94" y2="94" stroke="white" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/>
+  <line x1="41" y1="62" x2="79" y2="62" stroke="white" stroke-width="8.5" stroke-linecap="round"/>
 </svg>

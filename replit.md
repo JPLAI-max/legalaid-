@@ -1,10 +1,10 @@
-# CaseBinder AI
+# Exhibit A
 
 ## Overview
 
-CaseBinder AI is a legal evidence organization tool. It helps users upload case evidence, search documents, create a chronological legal timeline, type their case narrative, generate a neutral AI-powered case summary, attach evidence to timeline events, and export an attorney-ready packet.
+Exhibit A is a legal evidence organization tool. It helps users upload case evidence, search documents, create a chronological legal timeline, type their case narrative, generate a neutral AI-powered case summary, attach evidence to timeline events, and export an attorney-ready packet.
 
-**Disclaimer:** CaseBinder AI is an organization tool and does not provide legal advice.
+**Disclaimer:** Exhibit A is an organization tool and does not provide legal advice.
 
 ## Stack
 
