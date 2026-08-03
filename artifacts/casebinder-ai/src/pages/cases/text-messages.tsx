@@ -185,7 +185,12 @@ function UploadPanel({ caseId, onSuccess }: UploadPanelProps) {
 
       if (!resp.ok) {
         const data = await resp.json().catch(() => ({}));
-        throw new Error((data as { error?: string }).error || `Upload failed (${resp.status})`);
+        const serverMsg = (data as { error?: string }).error || "Unexpected error";
+        if (resp.status >= 500) {
+          throw new Error(`Server error — ${serverMsg}`);
+        }
+        // 422: genuine parse / format failure — surface as-is
+        throw new Error(serverMsg);
       }
 
       const result = await resp.json();

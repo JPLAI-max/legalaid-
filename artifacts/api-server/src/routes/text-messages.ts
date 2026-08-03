@@ -151,7 +151,7 @@ Rules:
       { role: "user", content: prompt },
     ],
     response_format: { type: "json_object" },
-    max_tokens: 4096,
+    max_completion_tokens: 4096,
   });
 
   const raw = completion.choices[0]?.message?.content ?? "{}";
@@ -211,7 +211,7 @@ Rules:
       },
     ],
     response_format: { type: "json_object" },
-    max_tokens: 4096,
+    max_completion_tokens: 4096,
   });
 
   const raw = completion.choices[0]?.message?.content ?? "{}";
@@ -265,7 +265,18 @@ router.post(
       }
     } catch (err) {
       req.log.error({ err }, "Failed to parse text message file");
-      return res.status(500).json({ error: "Failed to parse the file. Please check the format and try again." });
+      // OpenAI / AI-integration API errors carry a numeric `status` field.
+      // Treat them as 502 (upstream failure) so the client can distinguish
+      // them from a genuine 422 parse/format problem.
+      const apiErr = err as { status?: number; message?: string };
+      if (typeof apiErr.status === "number") {
+        return res.status(502).json({
+          error: `AI service error: ${apiErr.message ?? "Unknown error from AI service"}`,
+        });
+      }
+      return res.status(500).json({
+        error: "Failed to process the file. Please try again.",
+      });
     }
 
     if (!parsed.messages || parsed.messages.length === 0) {
