@@ -5,12 +5,17 @@ import { db } from "@workspace/db";
 /**
  * Run pending Drizzle migrations before the server starts accepting traffic.
  *
- * The migrations folder lives at lib/db/migrations/ in the workspace root.
- * Both dev (running from source) and production (running compiled dist/)
- * share the same CWD — the workspace root — so this path works in both modes.
+ * The esbuild build step copies lib/db/migrations/ → dist/migrations/ so the
+ * migrations folder is always at path.join(__dirname, "migrations").
+ *
+ * The initial migration SQL is written to be idempotent (IF NOT EXISTS /
+ * DO … EXCEPTION WHEN duplicate_object blocks) so it is safe to run against
+ * a database that already has the schema, e.g. when upgrading from a codebase
+ * that was previously using drizzle-kit push instead of migrate.
  */
 export async function runMigrations(): Promise<void> {
-  const migrationsFolder = path.join(process.cwd(), "lib/db/migrations");
+  // __dirname is injected by the esbuild banner; equals the dist/ directory.
+  const migrationsFolder = path.join(__dirname, "migrations");
   await migrate(db, { migrationsFolder });
   console.info("[startup] DB migrations applied successfully.");
 }
