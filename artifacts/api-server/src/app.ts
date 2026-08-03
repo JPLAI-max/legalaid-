@@ -1,5 +1,7 @@
 import express, { type Express } from "express";
 import cors from "cors";
+import path from "path";
+import { fileURLToPath } from "url";
 import pinoHttp from "pino-http";
 import { clerkMiddleware } from "@clerk/express";
 import { publishableKeyFromHost } from "@clerk/shared/keys";
@@ -8,37 +10,34 @@ import {
   clerkProxyMiddleware,
   getClerkProxyHost,
 } from "./middlewares/clerkProxyMiddleware";
+import { generalLimiter, aiLimiter } from "./middlewares/limiters";
 import router from "./routes";
 import { logger } from "./lib/logger";
 
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
 const app: Express = express();
 
+// ── Request logging ───────────────────────────────────────────────────────────
 app.use(
   pinoHttp({
     logger,
     serializers: {
       req(req) {
-        return {
-          id: req.id,
-          method: req.method,
-          url: req.url?.split("?")[0],
-        };
+        return { id: req.id, method: req.method, url: req.url?.split("?")[0] };
       },
       res(res) {
-        return {
-          statusCode: res.statusCode,
-        };
+        return { statusCode: res.statusCode };
       },
     },
   }),
 );
 
+// ── Clerk proxy + core middleware ─────────────────────────────────────────────
 app.use(CLERK_PROXY_PATH, clerkProxyMiddleware());
-
 app.use(cors({ credentials: true, origin: true }));
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true }));
-
 app.use(
   clerkMiddleware((req) => ({
     publishableKey: publishableKeyFromHost(
@@ -48,6 +47,36 @@ app.use(
   })),
 );
 
+// ── Rate limiters — registered BEFORE routers so they always fire ─────────────
+//
+// General: 1 500 req / 15 min per user (keyed by Clerk userId, not IP).
+app.use("/api", generalLimiter);
+
+// AI: 30 req / 15 min per user — method-scoped to POST so GET reads
+// (transcript list, summary fetch, etc.) don't consume the AI quota.
+app.post("/api/cases/:caseId/ai/generate-summary", aiLimiter);
+app.post("/api/cases/:caseId/ai/suggest-events", aiLimiter);
+app.post("/api/cases/:caseId/text-messages/upload", aiLimiter);
+app.post(
+  "/api/cases/:caseId/text-messages/threads/:threadId/suggest",
+  aiLimiter,
+);
+
+// ── API routes ────────────────────────────────────────────────────────────────
 app.use("/api", router);
+
+// ── Production: serve the built React frontend + SPA fallback ─────────────────
+// The frontend is built to artifacts/casebinder-ai/dist/public/ by the
+// production build step.  All non-/api paths fall through to index.html so
+// client-side routing (wouter) works after a hard refresh.
+if (process.env.NODE_ENV === "production") {
+  // From dist/index.mjs: __dirname = artifacts/api-server/dist/
+  // → ../../casebinder-ai/dist/public = artifacts/casebinder-ai/dist/public ✓
+  const frontendDist = path.join(__dirname, "../../casebinder-ai/dist/public");
+  app.use(express.static(frontendDist));
+  app.get("*", (_req, res) => {
+    res.sendFile(path.join(frontendDist, "index.html"));
+  });
+}
 
 export default app;

@@ -3,12 +3,14 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { build as esbuild } from "esbuild";
 import esbuildPluginPino from "esbuild-plugin-pino";
-import { rm } from "node:fs/promises";
+import { rm, cp, mkdir } from "node:fs/promises";
+import { existsSync } from "node:fs";
 
 // Plugins (e.g. 'esbuild-plugin-pino') may use `require` to resolve dependencies
 globalThis.require = createRequire(import.meta.url);
 
 const artifactDir = path.dirname(fileURLToPath(import.meta.url));
+const workspaceRoot = path.resolve(artifactDir, "../..");
 
 async function buildAll() {
   const distDir = path.resolve(artifactDir, "dist");
@@ -118,6 +120,20 @@ globalThis.__dirname = __bannerPath.dirname(globalThis.__filename);
     `,
     },
   });
+
+  // Copy Drizzle migration SQL files into the dist bundle so the production
+  // server can run migrations at startup without needing the source tree.
+  const migrationsSource = path.join(workspaceRoot, "lib/db/migrations");
+  if (existsSync(migrationsSource)) {
+    const migrationsDest = path.join(distDir, "migrations");
+    await mkdir(migrationsDest, { recursive: true });
+    await cp(migrationsSource, migrationsDest, { recursive: true });
+    console.log("Copied DB migrations to dist/migrations/");
+  } else {
+    console.warn(
+      "WARNING: lib/db/migrations/ not found — run `pnpm --filter @workspace/db drizzle-kit generate` first.",
+    );
+  }
 }
 
 buildAll().catch((err) => {
