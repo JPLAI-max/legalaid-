@@ -74,7 +74,9 @@ if (process.env.NODE_ENV === "production") {
   // → ../../casebinder-ai/dist/public = artifacts/casebinder-ai/dist/public ✓
   const frontendDist = path.join(__dirname, "../../casebinder-ai/dist/public");
   app.use(express.static(frontendDist));
-  app.get("*", (_req, res) => {
+  // Express 5 / path-to-regexp v8 dropped bare "*" wildcards.
+  // Use a regex catch-all for the SPA fallback instead.
+  app.get(/.*/, (_req, res) => {
     res.sendFile(path.join(frontendDist, "index.html"));
   });
 }
