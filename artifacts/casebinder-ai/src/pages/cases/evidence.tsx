@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { format } from "date-fns";
+import { parseLocalDate } from "@/lib/dates";
 import { FileText, File, Image as ImageIcon, Loader2 } from "lucide-react";
 import { 
   useListEvidence, 
@@ -160,7 +161,7 @@ export function EvidenceUpload({ params }: { params: { caseId: string } }) {
                       {format(new Date(item.uploadedAt), "MMM d, yyyy")}
                     </TableCell>
                     <TableCell className="text-sm text-muted-foreground">
-                      {item.detectedDate ? format(new Date(item.detectedDate), "MMM d, yyyy") : "-"}
+                      {item.detectedDate ? format(parseLocalDate(item.detectedDate), "MMM d, yyyy") : "-"}
                     </TableCell>
                     <TableCell>
                       {getStatusBadge(item.processingStatus)}

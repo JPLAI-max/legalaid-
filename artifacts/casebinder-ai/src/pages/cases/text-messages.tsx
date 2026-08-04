@@ -67,6 +67,7 @@ interface Thread {
   firstMessageAt?: string | null;
   lastMessageAt?: string | null;
   createdAt: string;
+  evidenceId?: number | null;
 }
 
 interface SuggestedEvent {
@@ -538,17 +539,36 @@ function ThreadViewer({
     }
   }
 
-  function handleAddSuggestion(event: SuggestedEvent) {
-    createEvent.mutate({
-      caseId,
-      data: {
-        title: event.title,
-        eventDate: event.estimatedDate ?? new Date().toISOString().split("T")[0],
-        description: event.description,
-        people: event.people,
-        tags: ["text message", "sms", "ai-suggested"],
-      },
-    });
+  async function handleAddSuggestion(event: SuggestedEvent) {
+    // Build metadata tags so the timeline can link back to this conversation
+    const sourceTags: string[] = [`sms-thread:${threadId}`];
+    if (event.relevantMessageIds && event.relevantMessageIds.length > 0) {
+      sourceTags.push(`sms-msgs:${event.relevantMessageIds.join(",")}`);
+    }
+
+    try {
+      const created = await createEvent.mutateAsync({
+        caseId,
+        data: {
+          title: event.title,
+          eventDate: event.estimatedDate ?? new Date().toISOString().split("T")[0],
+          description: event.description,
+          people: event.people,
+          tags: ["text message", "sms", "ai-suggested", ...sourceTags],
+        },
+      });
+
+      // Auto-attach the source conversation as evidence on the new event
+      if (thread?.evidenceId) {
+        await fetch(`${basePath}/api/cases/${caseId}/events/${created.id}/evidence`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ evidenceId: thread.evidenceId }),
+        });
+      }
+    } catch {
+      // createEvent.mutateAsync surfaces errors via its onError callback
+    }
   }
 
   if (isLoading) {
@@ -777,7 +797,13 @@ function ThreadViewer({
 export function TextMessagesPage({ params }: { params: { caseId: string } }) {
   const caseId = parseInt(params.caseId);
   const queryClient = useQueryClient();
-  const [selectedThreadId, setSelectedThreadId] = useState<number | null>(null);
+
+  // Support deep-linking from the timeline: ?thread=N auto-opens that conversation.
+  const initialThreadId = (() => {
+    const p = new URLSearchParams(window.location.search).get("thread");
+    return p ? parseInt(p) : null;
+  })();
+  const [selectedThreadId, setSelectedThreadId] = useState<number | null>(initialThreadId);
   const [contactFilter, setContactFilter] = useState("");
 
   const { data: threads = [], isLoading } = useListTextMessageThreads(caseId, {

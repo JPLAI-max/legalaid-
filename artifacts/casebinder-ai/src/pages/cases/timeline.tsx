@@ -1,9 +1,11 @@
 import { useState, useRef } from "react";
 import { format } from "date-fns";
+import { useLocation } from "wouter";
 import {
   Plus, Edit2, Trash2, Calendar, FileText, Users, Tag, Loader2,
   Mail, MessageSquare, ImageIcon, File, Download, X,
 } from "lucide-react";
+import { parseLocalDate } from "@/lib/dates";
 import { VoiceButton } from "@/components/ui/voice-button";
 import {
   useListTimelineEvents,
@@ -108,7 +110,7 @@ function EvidencePopoverContent({ ev }: { ev: Evidence }) {
       ) : kind === "email" ? (
         <div className="space-y-1 text-xs text-muted-foreground">
           {ev.detectedDate && (
-            <p><span className="font-medium text-foreground">Date:</span> {format(new Date(ev.detectedDate), "PP")}</p>
+            <p><span className="font-medium text-foreground">Date:</span> {format(parseLocalDate(ev.detectedDate), "PP")}</p>
           )}
           {ev.people.length > 0 && (
             <p><span className="font-medium text-foreground">People:</span> {ev.people.join(", ")}</p>
@@ -121,7 +123,7 @@ function EvidencePopoverContent({ ev }: { ev: Evidence }) {
         <div className="space-y-1 text-xs text-muted-foreground">
           <p><span className="font-medium text-foreground">Type:</span> {ev.fileType}</p>
           {ev.detectedDate && (
-            <p><span className="font-medium text-foreground">Date:</span> {format(new Date(ev.detectedDate), "PP")}</p>
+            <p><span className="font-medium text-foreground">Date:</span> {format(parseLocalDate(ev.detectedDate), "PP")}</p>
           )}
           {ev.fileSize != null && (
             <p><span className="font-medium text-foreground">Size:</span> {(ev.fileSize / 1024).toFixed(1)} KB</p>
@@ -162,7 +164,7 @@ function EvidenceViewerDialog({
           </div>
           <DialogDescription>
             {ev.fileType}
-            {ev.detectedDate ? ` · ${format(new Date(ev.detectedDate), "PP")}` : ""}
+            {ev.detectedDate ? ` · ${format(parseLocalDate(ev.detectedDate), "PP")}` : ""}
             {ev.fileSize != null ? ` · ${(ev.fileSize / 1024).toFixed(1)} KB` : ""}
           </DialogDescription>
         </DialogHeader>
@@ -180,7 +182,7 @@ function EvidenceViewerDialog({
                 <div className="rounded-md bg-background p-3 text-xs space-y-1 border">
                   <p><span className="font-semibold">People:</span> {ev.people.join(", ")}</p>
                   {ev.tags.length > 0 && <p><span className="font-semibold">Tags:</span> {ev.tags.join(", ")}</p>}
-                  {ev.detectedDate && <p><span className="font-semibold">Date:</span> {format(new Date(ev.detectedDate), "PPpp")}</p>}
+                  {ev.detectedDate && <p><span className="font-semibold">Date:</span> {format(parseLocalDate(ev.detectedDate), "PPpp")}</p>}
                 </div>
               )}
               <pre className="whitespace-pre-wrap font-sans text-sm leading-relaxed">
@@ -311,10 +313,24 @@ function EventEvidenceRow({ caseId, eventId }: { caseId: number; eventId: number
 // Main page
 // ---------------------------------------------------------------------------
 
+/** Extract the source SMS thread ID from internal event tags, e.g. "sms-thread:42" → 42 */
+function getSmsThreadId(tags: string[]): number | null {
+  const tag = tags.find((t) => t.startsWith("sms-thread:"));
+  if (!tag) return null;
+  const n = parseInt(tag.split(":")[1]);
+  return isNaN(n) ? null : n;
+}
+
+/** Strip internal metadata tags from the user-visible tag list */
+function visibleTags(tags: string[]): string[] {
+  return tags.filter((t) => !t.startsWith("sms-thread:") && !t.startsWith("sms-msgs:"));
+}
+
 export function TimelineBuilder({ params }: { params: { caseId: string } }) {
   const caseId = parseInt(params.caseId);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [, setLocation] = useLocation();
 
   const { data: events, isLoading } = useListTimelineEvents(caseId, {
     query: { enabled: !!caseId, queryKey: getListTimelineEventsQueryKey(caseId) },
@@ -454,7 +470,7 @@ export function TimelineBuilder({ params }: { params: { caseId: string } }) {
               <div className="flex flex-col md:flex-row gap-2 mb-2 text-sm">
                 <span className="font-bold text-foreground flex items-center">
                   <Calendar className="mr-1 h-3.5 w-3.5" />
-                  {format(new Date(event.eventDate), "PP")}
+                  {format(parseLocalDate(event.eventDate), "PP")}
                 </span>
                 {event.eventTime && (
                   <span className="text-muted-foreground ml-2">{event.eventTime}</span>
@@ -509,12 +525,12 @@ export function TimelineBuilder({ params }: { params: { caseId: string } }) {
                       </div>
                     )}
 
-                    {event.tags && event.tags.length > 0 && (
+                    {visibleTags(event.tags ?? []).length > 0 && (
                       <div className="flex items-center gap-1.5">
                         <Tag className="h-3.5 w-3.5 text-muted-foreground" />
                         <span className="text-muted-foreground">Tags:</span>
                         <div className="flex gap-1 flex-wrap">
-                          {event.tags.map((t) => (
+                          {visibleTags(event.tags ?? []).map((t) => (
                             <Badge key={t} variant="outline" className="text-xs">{t}</Badge>
                           ))}
                         </div>
@@ -524,6 +540,23 @@ export function TimelineBuilder({ params }: { params: { caseId: string } }) {
 
                   {/* Evidence chips — fetched per-event */}
                   <EventEvidenceRow caseId={caseId} eventId={event.id} />
+
+                  {/* Source conversation chip for AI-suggested events from text threads */}
+                  {getSmsThreadId(event.tags ?? []) !== null && (
+                    <div className="flex items-center gap-1.5 pt-2">
+                      <span className="text-xs text-muted-foreground">Source:</span>
+                      <button
+                        onClick={() =>
+                          setLocation(`/cases/${caseId}/text-messages?thread=${getSmsThreadId(event.tags ?? [])}`)
+                        }
+                        className="inline-flex items-center gap-1.5 rounded-full border bg-background px-2.5 py-0.5 text-xs font-medium text-muted-foreground hover:border-primary hover:text-primary transition-colors"
+                        title="Open source conversation"
+                      >
+                        <MessageSquare className="h-3 w-3 shrink-0" />
+                        Text conversation
+                      </button>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </div>

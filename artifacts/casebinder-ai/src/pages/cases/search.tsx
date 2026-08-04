@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Search as SearchIcon, FileText, Filter, CalendarPlus, Plus } from "lucide-react";
 import { VoiceButton } from "@/components/ui/voice-button";
 import { format } from "date-fns";
+import { parseLocalDate } from "@/lib/dates";
 import { 
   useListEvidence, 
   getListEvidenceQueryKey,
@@ -163,7 +164,7 @@ export function EvidenceSearch({ params }: { params: { caseId: string } }) {
 
                     <div className="flex flex-wrap gap-2 pt-2">
                       {item.detectedDate && (
-                        <Badge variant="outline">Detected Date: {format(new Date(item.detectedDate), "PP")}</Badge>
+                        <Badge variant="outline">Detected Date: {format(parseLocalDate(item.detectedDate), "PP")}</Badge>
                       )}
                       {item.tags?.map(tag => (
                         <Badge key={tag} variant="secondary">{tag}</Badge>

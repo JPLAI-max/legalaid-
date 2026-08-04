@@ -1,4 +1,5 @@
 import { format } from "date-fns";
+import { parseLocalDate } from "@/lib/dates";
 import { Check, X, Calendar, Users, Lightbulb, Search, Loader2 } from "lucide-react";
 import { 
   useListSuggestedEvents, 
@@ -86,7 +87,7 @@ export function SuggestedEventsPage({ params }: { params: { caseId: string } }) 
 
             <div className="flex items-center text-sm font-medium">
               <Calendar className="mr-2 h-4 w-4 text-muted-foreground" />
-              {event.estimatedDate ? format(new Date(event.estimatedDate), "PP") : "Unknown Date"}
+              {event.estimatedDate ? format(parseLocalDate(event.estimatedDate), "PP") : "Unknown Date"}
             </div>
 
             <p className="text-muted-foreground text-sm">
