@@ -41,6 +41,16 @@ const upload = multer({
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
+/**
+ * Normalize an AI-returned timestamp string to UTC.
+ * AI models return naive timestamps like "2024-02-10T09:14:00" (no timezone).
+ * Appending "Z" treats them as UTC so they're stored and round-tripped correctly.
+ */
+function normalizeTimestamp(ts: string): string {
+  if (/[Zz]$|[+-]\d{2}:?\d{2}$/.test(ts)) return ts; // already has timezone
+  return ts + "Z";
+}
+
 async function verifyCase(userId: string, caseId: number): Promise<boolean> {
   const [found] = await db
     .select({ id: casesTable.id })
@@ -313,7 +323,7 @@ router.post(
     const timestamps = parsed.messages
       .map((m) => m.timestamp)
       .filter(Boolean)
-      .map((t) => new Date(t!))
+      .map((t) => new Date(normalizeTimestamp(t!)))
       .filter((d) => !isNaN(d.getTime()));
 
     const firstAt = timestamps.length > 0 ? timestamps[0] : null;
@@ -342,7 +352,7 @@ router.post(
           sender: m.sender || (m.senderIsMe ? myName : contactName),
           senderIsMe: !!m.senderIsMe,
           content: m.content,
-          sentAt: m.timestamp ? new Date(m.timestamp) : null,
+          sentAt: m.timestamp ? new Date(normalizeTimestamp(m.timestamp)) : null,
           sequenceNumber: m.sequenceNumber ?? i + 1,
         }))
       );
@@ -459,6 +469,7 @@ router.post(
       )
       .join("\n");
 
+    try {
     const completion = await openai.chat.completions.create({
       model: "gpt-5.1",
       messages: [
@@ -490,14 +501,26 @@ Focus on legally significant events only. Return an empty array [] if no key eve
         },
       ],
       response_format: { type: "json_object" },
-      max_tokens: 2048,
+      max_completion_tokens: 2048,
     });
 
     const raw = completion.choices[0]?.message?.content ?? "{}";
     const data = JSON.parse(raw);
     const events = Array.isArray(data) ? data : (data.events ?? data.suggestions ?? []);
     return res.json(events);
+  } catch (err) {
+    req.log.error({ err }, "Failed to generate timeline suggestions");
+    const apiErr = err as { status?: number; message?: string };
+    if (typeof apiErr.status === "number") {
+      return res.status(502).json({
+        error: `AI service error: ${apiErr.message ?? "Unknown error from AI service"}`,
+      });
+    }
+    return res.status(500).json({ error: "Failed to generate suggestions. Please try again." });
+  }
   }
 );
+
+
 
 export default router;

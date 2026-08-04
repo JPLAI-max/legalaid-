@@ -78,18 +78,29 @@ interface SuggestedEvent {
   relevantMessageIds: number[];
 }
 
+/**
+ * Timestamps are stored as UTC in the DB, but they represent naive local times
+ * from the user's phone export (no timezone info was in the source file).
+ * Render them as UTC so the time shown matches what was in the original file.
+ */
+function toDisplayDate(dateStr: string): Date {
+  const d = new Date(dateStr);
+  // Shift by the local offset so format() outputs the UTC wall-clock value.
+  return new Date(d.getTime() + d.getTimezoneOffset() * 60000);
+}
+
 function fmtDate(dateStr: string | null | undefined): string {
   if (!dateStr) return "";
   const d = new Date(dateStr);
   if (!isValid(d)) return dateStr;
-  return format(d, "MMM d, yyyy h:mm a");
+  return format(toDisplayDate(dateStr), "MMM d, yyyy h:mm a");
 }
 
 function fmtDateShort(dateStr: string | null | undefined): string {
   if (!dateStr) return "";
   const d = new Date(dateStr);
   if (!isValid(d)) return dateStr;
-  return format(d, "MMM d, h:mm a");
+  return format(toDisplayDate(dateStr), "MMM d, h:mm a");
 }
 
 const EXPORT_GUIDES = [
@@ -438,6 +449,7 @@ function ThreadViewer({
   const [filterDateTo, setFilterDateTo] = useState("");
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
   const [suggestions, setSuggestions] = useState<SuggestedEvent[] | null>(null);
+  const [suggestError, setSuggestError] = useState<string | null>(null);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [isSuggesting, setIsSuggesting] = useState(false);
 
@@ -503,16 +515,24 @@ function ThreadViewer({
 
   async function handleSuggest() {
     setIsSuggesting(true);
+    setSuggestions(null);
+    setSuggestError(null);
     try {
       const resp = await fetch(`${basePath}/api/cases/${caseId}/text-messages/threads/${threadId}/suggest`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
       });
-      const events = await resp.json();
-      setSuggestions(Array.isArray(events) ? events : []);
+      const body = await resp.json();
+      if (!resp.ok) {
+        const serverMsg = (body as { error?: string }).error ?? `Server error (${resp.status})`;
+        setSuggestError(serverMsg);
+        setShowSuggestions(true);
+        return;
+      }
+      setSuggestions(Array.isArray(body) ? body : []);
       setShowSuggestions(true);
     } catch {
-      toast({ title: "Could not generate suggestions", variant: "destructive" });
+      toast({ title: "Could not generate suggestions — check your connection and try again", variant: "destructive" });
     } finally {
       setIsSuggesting(false);
     }
@@ -688,7 +708,13 @@ function ThreadViewer({
               Based on this conversation with {thread.contactName}. Review and add events that are relevant to your case.
             </DialogDescription>
           </DialogHeader>
-          {!suggestions || suggestions.length === 0 ? (
+          {suggestError ? (
+            <Alert variant="destructive">
+              <AlertTriangle className="h-4 w-4" />
+              <AlertTitle>Something went wrong</AlertTitle>
+              <AlertDescription>{suggestError}</AlertDescription>
+            </Alert>
+          ) : !suggestions || suggestions.length === 0 ? (
             <p className="text-sm text-muted-foreground text-center py-6">
               No significant legal events were detected in this conversation.
             </p>
